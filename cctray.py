@@ -6,10 +6,10 @@ from flask import Flask, request, make_response
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    owner = request.args.get("owner")
-    repo = request.args.get("repo")
+    owner = request.args.get("owner") or request.form.get('owner')
+    repo = request.args.get("repo") or request.form.get('repo')
     token = os.environ.get("GITHUB_TOKEN")
 
     # GitHub API endpoint to retrieve workflow runs for a repository
