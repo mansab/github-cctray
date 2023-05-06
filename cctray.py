@@ -63,6 +63,13 @@ for workflow in data["workflows"]:
     # Set the URL of the project to the URL of the workflow on GitHub
     project.set("webUrl", workflow["html_url"])
 
+    # Set the last build time of the project to the timestamp of the latest run
+    if "runs" in workflow and len(workflow["runs"]) > 0:
+        latest_run = workflow["runs"][0]
+        project.set("lastBuildTime", latest_run["updated_at"])
+    else:
+        project.set("lastBuildTime", "")
+
 # Generate the XML string from the XML tree
 xml_string = ET.tostring(root, encoding="unicode")
 
