@@ -35,9 +35,10 @@ for workflow in data["workflows"]:
     project.set("name", workflow["name"])
 
     # Set the activity of the project based on the status of the latest run
-    if workflow["latest_run"]:
-        if workflow["latest_run"]["status"] == "completed":
-            if workflow["latest_run"]["conclusion"] == "success":
+    if "runs" in workflow and len(workflow["runs"]) > 0:
+        latest_run = workflow["runs"][0]
+        if latest_run["status"] == "completed":
+            if latest_run["conclusion"] == "success":
                 project.set("activity", "Sleeping")
             else:
                 project.set("activity", "Building")
@@ -47,9 +48,10 @@ for workflow in data["workflows"]:
         project.set("activity", "Sleeping")
 
     # Set the last build status of the project based on the status of the latest run
-    if workflow["latest_run"]:
-        if workflow["latest_run"]["status"] == "completed":
-            if workflow["latest_run"]["conclusion"] == "success":
+    if "runs" in workflow and len(workflow["runs"]) > 0:
+        latest_run = workflow["runs"][0]
+        if latest_run["status"] == "completed":
+            if latest_run["conclusion"] == "success":
                 project.set("lastBuildStatus", "Success")
             else:
                 project.set("lastBuildStatus", "Failure")
