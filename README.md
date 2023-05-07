@@ -7,8 +7,6 @@ A lightweight App that provides [Github Workflow Runs](https://docs.github.com/e
 # Usecase
 Visibility for your Github Actions & Workflows in one place.
 
-## CCMenu
-
 You can use the App to configure [CCTray Clients](https://cctray.org/clients/) like [CCMenu](https://ccmenu.org/) `[tested]`, [see below](#configuring-a-client-ccmenu).
 # Running the App
 
