@@ -2,6 +2,8 @@
 
 A lightweight App that provides [Github Workflow Runs](https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#list-workflow-runs-for-a-repository) information in [CCTray Specification](https://cctray.org/v1/).
 
+![STATUS](https://github.com/mansab/github-cctray/actions/workflows/.github/workflows/pylint.yml/badge.svg)
+
 # Usecase
 
 ## CCMenu
