@@ -19,7 +19,12 @@ def get_workflow_runs(owner, repo, token):
         "Accept": "application/vnd.github.v3+json"
     }
     response = req.get(endpoint, headers=headers)
-    return response.json()
+    if response is None:
+        logger.error("Failed to get response from GitHub API")
+    elif response.status_code != 200:
+        logger.error(f"GitHub API returned status code {response.status_code}")
+    else:
+        return response.json()
 
 
 @app.route('/')
