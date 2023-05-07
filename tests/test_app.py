@@ -12,7 +12,7 @@ class TestApp(unittest.TestCase):
     def test_index_missing_parameters(self):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 400)
-        self.assertIn(b"Missing parameters", response.data)
+        self.assertIn(b"Missing parameter(s)", response.data)
 
     @patch('app.get_workflow_runs')
     def test_index_successful_response(self, mock_workflow_runs):
