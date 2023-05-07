@@ -1,67 +1,62 @@
-"""Test App Module"""
 import unittest
 from unittest.mock import patch
-import xml.etree.ElementTree as ET
 from app import app
 
 
-class TestGithubCCTray(unittest.TestCase):
+class TestApp(unittest.TestCase):
 
-    @patch('app.req.get')
-    def test_index_returns_valid_xml_response(self, mock_get):
-        # Arrange
-        mock_get.return_value.json.return_value = {
+    def setUp(self):
+        app.testing = True
+        self.client = app.test_client()
+
+    def test_index_missing_parameters(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b"Missing parameters", response.data)
+
+    @patch('app.get_workflow_runs')
+    def test_index_successful_response(self, mock_workflow_runs):
+        mock_workflow_runs.return_value = {
             "workflow_runs": [
                 {
+                    "name": "CI",
                     "conclusion": "success",
-                    "updated_at": "2022-01-01T00:00:00Z",
-                    "html_url": "https://github.com/owner/repo/actions/runs/123"
+                    "updated_at": "2021-09-20T18:25:34Z",
+                    "html_url": "https://github.com/owner/repo/actions/runs/1234"
                 }
             ]
         }
-
-        # Act
-        response = app.test_client().get('/?owner=owner&repo=repo')
-
-        # Assert
+        response = self.client.get('/?owner=owner&repo=repo')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content_type, 'application/xml')
+        self.assertIn(b'<Project', response.data)
+        self.assertIn(b'name="repo/CI"', response.data)
+        self.assertIn(b'lastBuildStatus="Success"', response.data)
+        self.assertIn(b'webUrl="https://github.com/owner/repo/actions/runs/1234"', response.data)
 
-        root = ET.fromstring(response.data)
-
-        self.assertEqual(len(root.findall('Project')), 1)
-        project = root.find('Project')
-        self.assertEqual(project.attrib['name'], 'repo')
-        self.assertEqual(project.attrib['lastBuildStatus'], 'Success')
-        self.assertEqual(project.attrib['lastBuildTime'], '2022-01-01T00:00:00Z')
-        self.assertEqual(project.attrib['webUrl'], 'https://github.com/owner/repo/actions/runs/123')
-
-    def test_index_missing_parameters(self):
-        # Arrange
-        expected_response = b'Missing parameters'
-
-        # Act
-        response = app.test_client().get('/')
-
-        # Assert
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data, expected_response)
-
-    @patch.dict('os.environ', {'GITHUB_TOKEN': 'token'})
-    @patch('app.req.get')
-    def test_get_workflow_runs_called_with_correct_params(self, mock_get):
-        # Arrange
-        owner = 'owner'
-        repo = 'repo'
-        token = 'token'
-        expected_endpoint = f'https://api.github.com/repos/{owner}/{repo}/actions/runs'
-        expected_headers = {
-            'Authorization': f'Bearer {token}',
-            'Accept': 'application/vnd.github.v3+json'
+    @patch('app.get_workflow_runs')
+    def test_index_unknown_build_status(self, mock_workflow_runs):
+        mock_workflow_runs.return_value = {
+            "workflow_runs": [
+                {
+                    "name": "CI",
+                    "conclusion": None,
+                    "updated_at": "2021-09-20T18:25:34Z",
+                    "html_url": "https://github.com/owner/repo/actions/runs/1234"
+                }
+            ]
         }
+        response = self.client.get('/?owner=owner&repo=repo')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'<Project', response.data)
+        self.assertIn(b'lastBuildStatus="Unknown"', response.data)
 
-        # Act
-        app.test_client().get(f'/?owner={owner}&repo={repo}')
+    @patch('app.get_workflow_runs')
+    def test_index_failed_response(self, mock_workflow_runs):
+        mock_workflow_runs.return_value = None
+        response = self.client.get('/?owner=owner&repo=repo')
+        self.assertEqual(response.status_code, 500)
+        self.assertIn(b"An error occurred.", response.data)
 
-        # Assert
-        mock_get.assert_called_with(expected_endpoint, headers=expected_headers)
+
+if __name__ == '__main__':
+    unittest.main()

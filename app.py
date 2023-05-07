@@ -39,7 +39,7 @@ def index():
     for run in data["workflow_runs"]:
         project = ET.SubElement(root, "Project")
 
-        project.set("name", repo)
+        project.set("name", repo + "/" + run["name"])
 
         if run["conclusion"] == "success":
             project.set("lastBuildStatus", "Success")
