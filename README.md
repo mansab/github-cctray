@@ -5,6 +5,7 @@ A lightweight App that provides [Github Workflow Runs](https://docs.github.com/e
 ![STATUS](https://github.com/mansab/github-cctray/actions/workflows/.github/workflows/pylint.yml/badge.svg)
 
 # Usecase
+Visibility for your Github Actions & Workflows in one place.
 
 ## CCMenu
 
