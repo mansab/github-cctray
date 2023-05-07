@@ -16,8 +16,10 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        python -m venv venv
+        source venv/bin/activate
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run the tests
       run: |
-        python -m unittest discover tests
+        venv/bin/python -m unittest discover tests
