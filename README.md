@@ -59,3 +59,17 @@ curl -X GET http://localhost:8000?owner<repo_owner>&repo<repository_name>
 ```bash
 curl -d "owner=<repo_owner>&repo=<repository_name>" -X POST http://localhost:8000
 ```
+
+# Configuring a Client (CCMenu)
+
+You can configure a CCTray client by adding above App's URL with parameters and select the required or all the workflows in your Github respository.
+
+In the below snapshots you can see CCMenu configured against this project's repository workflows as an example:
+
+## Menu Bar
+
+<img src="./images/ccmenu_desktop_menu_bar.png?raw=true" />
+
+## Project Configuration
+
+<img src="./images/ccmenu_projects_configuration.png?raw=true" />
