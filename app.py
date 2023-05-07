@@ -39,23 +39,28 @@ def index():
 
     data = get_workflow_runs(owner, repo, token)
 
+    # Sort workflow runs by 'updated_at' timestamp in descending order
+    workflow_runs = sorted(data["workflow_runs"], key=lambda run: run["updated_at"], reverse=True)
+
     root = ET.Element("Projects")
+    project_names = set()  # Set to store unique project names
 
-    for run in data["workflow_runs"]:
-        project = ET.SubElement(root, "Project")
+    for run in workflow_runs:
+        project_name = repo + "/" + run["name"]
+        if project_name not in project_names:  # Check if project name is already in the set
+            project_names.add(project_name)  # Add project name to the set
+            project = ET.SubElement(root, "Project")
+            project.set("name", project_name)
 
-        project.set("name", repo + "/" + run["name"])
+            if run["conclusion"] == "success":
+                project.set("lastBuildStatus", "Success")
+            elif run["conclusion"] == "failure":
+                project.set("lastBuildStatus", "Failure")
+            else:
+                project.set("lastBuildStatus", "Unknown")
 
-        if run["conclusion"] == "success":
-            project.set("lastBuildStatus", "Success")
-        elif run["conclusion"] == "failure":
-            project.set("lastBuildStatus", "Failure")
-        else:
-            project.set("lastBuildStatus", "Unknown")
-
-        project.set("lastBuildTime", run["updated_at"])
-
-        project.set("webUrl", run["html_url"])
+            project.set("lastBuildTime", run["updated_at"])
+            project.set("webUrl", run["html_url"])
 
     response = make_response(ET.tostring(root).decode())
     response.headers['Content-Type'] = 'application/xml'
