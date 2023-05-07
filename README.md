@@ -18,7 +18,7 @@ You can use the App to configure [CCTray Clients](https://cctray.org/clients/) l
 * pip
 * Github Personal Access Token
     * [FGPAT (recommended) or PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
-    * Read-Only access to Actions (Workflows, workflow runs and artifacts) required
+    * Read-Only access to Actions (Workflows, workflow runs and artifacts) required for Private repos.
 
 ## Setup
  
