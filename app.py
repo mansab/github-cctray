@@ -1,8 +1,9 @@
+"""App Module"""
 import os
-import requests as req
 import xml.etree.ElementTree as ET
-from flask import Flask, request, make_response
 import logging
+import requests as req
+from flask import Flask, request, make_response
 
 app = Flask('github-cctray')
 
