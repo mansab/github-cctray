@@ -2,8 +2,13 @@ import os
 import requests as req
 import xml.etree.ElementTree as ET
 from flask import Flask, request, make_response
+import logging
 
 app = Flask('github-cctray')
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = app.logger
 
 
 def get_workflow_runs(owner, repo, token):
@@ -23,6 +28,7 @@ def index():
     token = os.environ.get("GITHUB_TOKEN")
 
     if not owner or not repo or not token:
+        logger.warning("Missing parameters")
         return make_response("Missing parameters", 400)
 
     data = get_workflow_runs(owner, repo, token)
@@ -47,8 +53,20 @@ def index():
 
     response = make_response(ET.tostring(root).decode())
     response.headers['Content-Type'] = 'application/xml'
+
+    # Log request URI and response code
+    logger.info(f"Request URI: {request.path} Response Code: {response.status_code}")
+
     return response
 
 
+@app.errorhandler(Exception)
+def handle_error(e):
+    # Log the error
+    logger.error(f"An error occurred: {str(e)}")
+    return "An error occurred.", 500
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    from waitress import serve
+    serve(app, host='0.0.0.0', port=8000)
