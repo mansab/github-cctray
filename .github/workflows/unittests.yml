@@ -2,6 +2,9 @@ name: unit_tests
 
 on: [push]
 
+env:
+  GITHUB_TOKEN: "token"
+
 jobs:
   build:
     runs-on: ubuntu-latest
