@@ -52,13 +52,18 @@ def index():
             project = ET.SubElement(root, "Project")
             project.set("name", project_name)
 
-            if run["conclusion"] == "success":
-                project.set("lastBuildStatus", "Success")
-            elif run["conclusion"] == "failure":
-                project.set("lastBuildStatus", "Failure")
+            # Map 'status' field to 'activity'
+            if run["status"] == "completed":
+                if run["conclusion"] == "success":
+                    project.set("activity", "Sleeping")
+                elif run["conclusion"] == "failure":
+                    project.set("activity", "Unknown")
+                else:
+                    project.set("activity", "Unknown")
             else:
-                project.set("lastBuildStatus", "Unknown")
+                project.set("activity", "Building")
 
+            project.set("lastBuildStatus", "Success" if run["conclusion"] == "success" else "Failure" if run["conclusion"] == "failure" else "Unknown")
             project.set("lastBuildTime", run["updated_at"])
             project.set("webUrl", run["html_url"])
 

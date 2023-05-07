@@ -20,6 +20,7 @@ class TestApp(unittest.TestCase):
             "workflow_runs": [
                 {
                     "name": "CI",
+                    "status": "completed",
                     "conclusion": "success",
                     "updated_at": "2021-09-20T18:25:34Z",
                     "html_url": "https://github.com/owner/repo/actions/runs/1234"
@@ -30,6 +31,7 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'<Project', response.data)
         self.assertIn(b'name="repo/CI"', response.data)
+        self.assertIn(b'activity="Sleeping', response.data)
         self.assertIn(b'lastBuildStatus="Success"', response.data)
         self.assertIn(b'webUrl="https://github.com/owner/repo/actions/runs/1234"', response.data)
 
@@ -39,6 +41,7 @@ class TestApp(unittest.TestCase):
             "workflow_runs": [
                 {
                     "name": "CI",
+                    "status": "in_progress",
                     "conclusion": None,
                     "updated_at": "2021-09-20T18:25:34Z",
                     "html_url": "https://github.com/owner/repo/actions/runs/1234"
