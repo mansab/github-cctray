@@ -34,8 +34,8 @@ def index():
     token = os.environ.get("GITHUB_TOKEN")
 
     if not owner or not repo or not token:
-        logger.warning("Missing parameters")
-        return make_response("Missing parameters", 400)
+        logger.warning("Missing parameter(s) or Environment Variable")
+        return make_response("Missing parameter(s)", 400)
 
     data = get_workflow_runs(owner, repo, token)
 
