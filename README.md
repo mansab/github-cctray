@@ -68,8 +68,8 @@ In the below snapshots you can see CCMenu configured against this project's repo
 
 ## Menu Bar
 
-<img src="./images/ccmenu_desktop_menu_bar.png?raw=true" />
+<img src="./images/ccmenu_desktop_menu_bar.png?raw=true" width="250" height="250"/>
 
 ## Project Configuration
 
-<img src="./images/ccmenu_projects_configuration.png?raw=true" />
+<img src="./images/ccmenu_projects_configuration.png?raw=true" width="500" height="500"/>
