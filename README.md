@@ -6,8 +6,7 @@ A lightweight App that provides [Github Workflow Runs](https://docs.github.com/e
 
 ## CCMenu
 
-You can use the App to configure [CCTray Clients](https://cctray.org/clients/) like [CCMenu](https://ccmenu.org/) `[tested]`.
-
+You can use the App to configure [CCTray Clients](https://cctray.org/clients/) like [CCMenu](https://ccmenu.org/) `[tested]`, [see below](#configuring-a-client-ccmenu).
 # Running the App
 
 ## Prerequisites
