@@ -1,6 +1,6 @@
 # Github-CCTray
 
-A lightweight App that provides [Github Workflow Runs](https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#list-workflow-runs-for-a-repository) information in [CCTray Specification](https://cctray.org/v1/).
+A lightweight App that provides [all Github Workflows of a Repository](https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#list-workflow-runs-for-a-repository) in [CCTray Specification](https://cctray.org/v1/).
 
 ![STATUS](https://github.com/mansab/github-cctray/actions/workflows/.github/workflows/pylint.yml/badge.svg)
 ![STATUS](https://github.com/mansab/github-cctray/actions/workflows/.github/workflows/unittests.yml/badge.svg)
@@ -42,7 +42,7 @@ export GITHUB_TOKEN=<token>
 python app.py
 ```
 
-# Accessing the App
+# Usage
 
 Once up, the App binds to port `8000` by default and should be available at: http://localhost:8000
 
@@ -62,6 +62,18 @@ curl -X GET http://localhost:8000?owner<repo_owner>&repo<repository_name>
 
 ```bash
 curl -d "owner=<repo_owner>&repo=<repository_name>" -X POST http://localhost:8000
+```
+
+## Response
+
+The above request would return an XML response (CCTray Specification) with all the workflows of a repository, while filtering them to return only **Unique & Latest** runs:
+
+```bash
+<Projects>
+<Project name="github-cctray/CodeQL" activity="Sleeping" lastBuildStatus="Success" lastBuildTime="2023-05-07T23:22:02Z" webUrl="https://github.com/mansab/github-cctray/actions/runs/4909813101"/>
+<Project name="github-cctray/Pylint" activity="Sleeping" lastBuildStatus="Success" lastBuildTime="2023-05-07T23:19:13Z" webUrl="https://github.com/mansab/github-cctray/actions/runs/4909813107"/>
+<Project name="github-cctray/TestUnit" activity="Sleeping" lastBuildStatus="Success" lastBuildTime="2023-05-07T23:18:59Z" webUrl="https://github.com/mansab/github-cctray/actions/runs/4909813102"/>
+</Projects>
 ```
 
 # Configuring a Client 
