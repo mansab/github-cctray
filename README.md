@@ -16,32 +16,25 @@ You can use the App to configure [CCTray Clients](https://cctray.org/clients/):
 
 ## Prerequisites
 
-* Python 3.9
-* pip
 * Github Personal Access Token
     * [FGPAT (recommended) or PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
     * Read-Only access to Actions (Workflows, workflow runs and artifacts) required for Private repos.
+* Development
+    * Python 3.9
+    * pip
 
-## Setup
- 
-* Activate [Python virtualenv](https://python.land/virtual-environments/virtualenv)
+## With Docker
+
+* Build the Docker image
 
 ```bash
-python -m venv venv
-source venv/bin/activate
+docker build -t github-cctray:latest . 
 ```
 
-* Install requirements
+* Launch the Docker container
 
 ```bash
-pip install -r requirements.txt
-```
-
-## Execute
-
-```bash
-export GITHUB_TOKEN=<token>
-python app.py
+ docker run -p 8000:8000 -e GITHUB_TOKEN="<your_token>" github-cctray:latest
 ```
 
 # Usage
@@ -116,6 +109,28 @@ Attributes are returned as follows:
     </tr>
   </tbody>
 </table>
+
+# Development Setup
+ 
+* Activate [Python virtualenv](https://python.land/virtual-environments/virtualenv)
+
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+* Install requirements
+
+```bash
+pip install -r requirements.txt
+```
+
+* Execute
+
+```bash
+export GITHUB_TOKEN=<token>
+python app.py
+```
 
 # Configuring a Client 
 
