@@ -57,13 +57,15 @@ def index():
                 if run["conclusion"] == "success":
                     project.set("activity", "Sleeping")
                 elif run["conclusion"] == "failure":
-                    project.set("activity", "Unknown")
-                else:
-                    project.set("activity", "Unknown")
+                    project.set("activity", "Sleeping")
             else:
                 project.set("activity", "Building")
 
-            project.set("lastBuildStatus", "Success" if run["conclusion"] == "success" else "Failure" if run["conclusion"] == "failure" else "Unknown")
+            project.set("lastBuildStatus", "Success" 
+                        if run["conclusion"] == "success" 
+                        else "Failure" 
+                        if run["conclusion"] == "failure" 
+                        else "Unknown")
             project.set("lastBuildTime", run["updated_at"])
             project.set("webUrl", run["html_url"])
 
