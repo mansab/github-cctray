@@ -18,11 +18,11 @@ def get_workflow_runs(owner, repo, token):
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json"
     }
-    response = req.get(endpoint, headers=headers)
+    response = req.get(endpoint, headers=headers, timeout=10)
     if response is None:
         logger.error("Failed to get response from GitHub API")
     elif response.status_code != 200:
-        logger.error(f"GitHub API returned status code {response.status_code}")
+        logger.error("GitHub API returned status code %d", response.status_code)
     else:
         return response.json()
 
@@ -61,10 +61,10 @@ def index():
             else:
                 project.set("activity", "Building")
 
-            project.set("lastBuildStatus", "Success" 
-                        if run["conclusion"] == "success" 
-                        else "Failure" 
-                        if run["conclusion"] == "failure" 
+            project.set("lastBuildStatus", "Success"
+                        if run["conclusion"] == "success"
+                        else "Failure"
+                        if run["conclusion"] == "failure"
                         else "Unknown")
             project.set("lastBuildTime", run["updated_at"])
             project.set("webUrl", run["html_url"])
@@ -73,15 +73,17 @@ def index():
     response.headers['Content-Type'] = 'application/xml'
 
     # Log request URI and response code
-    logger.info(f"Request URI: {request.path} Response Code: {response.status_code}")
+    logger.info("Request URI: %s Response Code: %d", request.path, response.status_code)
+
 
     return response
 
 
 @app.errorhandler(Exception)
-def handle_error(e):
+def handle_error(exception):
     # Log the error
-    logger.error(f"An error occurred: {str(e)}")
+    logger.error("An error occurred: %s", str(exception))
+
     return "An error occurred.", 500
 
 
