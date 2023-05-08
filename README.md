@@ -76,6 +76,45 @@ The above request would return an XML response (CCTray Specification) with all t
 </Projects>
 ```
 
+Attributes are returned as follows:
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>name</td>
+      <td>Name of the repository and the workflow</td>
+      <td>string : repo_name/workflow</td>
+    </tr>
+    <tr>
+      <td>activity</td>
+      <td>the current state of the project</td>
+      <td>string enum : Sleeping, Building</td>
+    </tr>
+    <tr>
+      <td>lastBuildStatus</td>
+      <td>a brief description of the last build</td>
+      <td>string enum : Success, Failure, Unknown</td>
+    </tr>
+    <tr>
+      <td>lastBuildTime</td>
+      <td>when the last build occurred</td>
+      <td>DateTime</td>
+    </tr>
+    <tr>
+      <td>webUrl</td>
+      <td>Exact URL of the Github Action run for a workflow</td>
+      <td>string (URL)</td>
+    </tr>
+  </tbody>
+</table>
+
 # Configuring a Client 
 
 ## CCMenu
