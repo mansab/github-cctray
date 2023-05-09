@@ -1,4 +1,4 @@
 fileignoreconfig:
 - filename: app.py
-  checksum: 7513558223a19262ecde5fc046ec44f65d1b6769f6fca02865b9cacf876d85ba
-version: "1.0"
+  checksum: 31c4fd4cf73838c756706736591971ffd4ea63de9c40b5717b57e640076df13b
+version: "2.0"

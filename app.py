@@ -18,13 +18,26 @@ def get_workflow_runs(owner, repo, token):
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json"
     }
-    response = req.get(endpoint, headers=headers, timeout=10)
-    if response is None:
-        logger.error("Failed to get response from GitHub API")
-    elif response.status_code != 200:
-        logger.error("GitHub API returned status code %d", response.status_code)
-    else:
-        return response.json()
+    results = []
+    page = 1
+    while True:
+        response = req.get(f"{endpoint}?per_page=100&page={page}", headers=headers, timeout=10)
+        if response is None:
+            logger.error("Failed to get response from GitHub API")
+            return []
+        elif response.status_code != 200:
+            logger.error("GitHub API returned status code %d", response.status_code)
+            return []
+        else:
+            data = response.json()
+            results += data["workflow_runs"]
+            print(response.links)
+            if 'next' in response.links and page <= 3:
+                page += 1
+                print(page)
+            else:
+                break
+    return results
 
 
 @app.route('/')
@@ -40,7 +53,7 @@ def index():
     data = get_workflow_runs(owner, repo, token)
 
     # Sort workflow runs by 'updated_at' timestamp in descending order
-    workflow_runs = sorted(data["workflow_runs"], key=lambda run: run["updated_at"], reverse=True)
+    workflow_runs = sorted(data, key=lambda run: run["updated_at"], reverse=True)
 
     root = ET.Element("Projects")
     project_names = set()  # Set to store unique project names
