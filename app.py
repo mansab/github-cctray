@@ -9,7 +9,7 @@ from flask import Flask, request, make_response
 app = Flask('github-cctray')
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = app.logger
 
 

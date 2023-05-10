@@ -43,7 +43,10 @@ Once up, the App binds to port `8000` by default and should be available at: htt
 
 ## Making an HTTP request
 
-The App accepts GET and POST requests with **two manadatory parameters** `owner` & `repo`.
+The App accepts GET and POST requests with **two manadatory parameters**:
+
+* `owner` - Organisation or User who owns the repository
+* `repo` - Name of the Repository
 
 For Example:
 
