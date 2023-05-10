@@ -2,7 +2,8 @@
 import os
 import xml.etree.ElementTree as ET
 import logging
-import requests as req
+from concurrent.futures import ThreadPoolExecutor
+import requests as requests
 from flask import Flask, request, make_response
 
 app = Flask('github-cctray')
@@ -19,24 +20,27 @@ def get_workflow_runs(owner, repo, token):
         "Accept": "application/vnd.github.v3+json"
     }
     results = []
-    page = 1
-    while True:
-        response = req.get(f"{endpoint}?per_page=100&page={page}", headers=headers, timeout=10)
-        if response is None:
-            logger.error("Failed to get response from GitHub API")
-            return []
-        elif response.status_code != 200:
-            logger.error("GitHub API returned status code %d", response.status_code)
-            return []
-        else:
-            data = response.json()
-            results += data["workflow_runs"]
-            print(response.links)
-            if 'next' in response.links and page <= 3:
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = []
+        page = 1
+        while True:
+            future = executor.submit(requests.get, f"{endpoint}?per_page=100&page={page}", headers=headers, timeout=10)
+            futures.append(future)
+            if 'next' in future.result().links and page <= 3:
                 page += 1
-                print(page)
             else:
                 break
+        for future in futures:
+            response = future.result()
+            if response is None:
+                logger.error("Failed to get response from GitHub API")
+            elif response.status_code != 200:
+                logger.error("GitHub API returned status code %d", response.status_code)
+            else:
+                data = response.json()
+                results += data["workflow_runs"]
+
     return results
 
 
