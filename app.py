@@ -14,33 +14,32 @@ logger = app.logger
 
 
 def get_workflow_runs(owner, repo, token):
-    endpoint = f"https://api.github.com/repos/{owner}/{repo}/actions/runs"
+    endpoint = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json"
     }
     results = []
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = []
-        page = 1
-        while True:
-            future = executor.submit(requests.get, f"{endpoint}?per_page=100&page={page}", headers=headers, timeout=10)
-            futures.append(future)
-            if 'next' in future.result().links and page <= 3:
-                logger.info("Found next page %s, fetching more results...", page)
-                page += 1
-            else:
-                break
-        for future in futures:
-            response = future.result()
-            if response is None:
-                logger.error("Failed to get response from GitHub API")
-            elif response.status_code != 200:
-                logger.error("GitHub API returned status code %d", response.status_code)
-            else:
-                data = response.json()
-                results += data["workflow_runs"]
+    response = requests.get(endpoint, headers=headers, timeout=10)
+    if response.status_code != 200:
+        logger.error("GitHub API returned status code %d", response.status_code)
+    else:
+        workflows = response.json()["workflows"]
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = []
+            for workflow in workflows:
+                future = executor.submit(requests.get, f"{workflow['url']}/runs", headers=headers, timeout=10)
+                futures.append(future)
+            for future in futures:
+                response = future.result()
+                if response is None:
+                    logger.error("Failed to get response from GitHub API")
+                elif response.status_code != 200:
+                    logger.error("GitHub API returned status code %d", response.status_code)
+                else:
+                    data = response.json()
+                    results += data["workflow_runs"]
 
     return results
 
