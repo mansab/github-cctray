@@ -53,7 +53,7 @@ For Example:
 * GET
 
 ```bash
-curl -X GET http://localhost:8000?owner<repo_owner>&repo<repository_name>
+curl -X GET http://localhost:8000?owner=<repo_owner>&repo=<repository_name>
 ```
 
 * POST
