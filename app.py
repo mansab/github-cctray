@@ -28,6 +28,7 @@ def get_workflow_runs(owner, repo, token):
             future = executor.submit(requests.get, f"{endpoint}?per_page=100&page={page}", headers=headers, timeout=10)
             futures.append(future)
             if 'next' in future.result().links and page <= 3:
+                logger.info("Found next page %s, fetching more results...", page)
                 page += 1
             else:
                 break
