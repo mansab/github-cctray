@@ -23,4 +23,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        venv/bin/pylint --fail-under=8 $(git ls-files '*.py')
+        venv/bin/pylint --fail-under=9.5 $(git ls-files '*.py')

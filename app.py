@@ -1,51 +1,99 @@
 """App Module"""
 import os
-import xml.etree.ElementTree as ET
 import logging
 from concurrent.futures import ThreadPoolExecutor
-import requests as requests
+
+import xml.etree.ElementTree as ET
+import requests
 from flask import Flask, request, make_response
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask('github-cctray')
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = app.logger
+API_BASE_URL = "https://api.github.com"
+MAX_WORKERS = 10
+TIMEOUT = 10
 
 
-def get_workflow_runs(owner, repo, token):
-    endpoint = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows"
+def get_workflows(owner, repo, headers):
+    """Get the workflows for a given owner and repo from the GitHub API.
+
+    Args:
+        owner (str): The owner of the repository.
+        repo (str): The repository name.
+        headers (dict): HTTP headers to be sent with the request.
+
+    Returns:
+        list: A list of workflows for the given repository.
+
+    Raises:
+        requests.HTTPError: If the request to the GitHub API fails.
+    """
+    endpoint = f"{API_BASE_URL}/repos/{owner}/{repo}/actions/workflows"
+    response = requests.get(endpoint, headers=headers, timeout=TIMEOUT)
+    response.raise_for_status()
+    return response.json()["workflows"]
+
+
+def get_workflow_runs(workflow, headers):
+    """Get the workflow runs for a specific workflow from the GitHub API.
+
+    Args:
+        workflow (dict): The workflow information.
+        headers (dict): HTTP headers to be sent with the request.
+
+    Returns:
+        list: A list of workflow runs for the given workflow.
+
+    Raises:
+        requests.HTTPError: If the request to the GitHub API fails.
+    """
+    url = f"{workflow['url']}/runs"
+    response = requests.get(url, headers=headers, timeout=TIMEOUT)
+    response.raise_for_status()
+    return response.json()["workflow_runs"]
+
+
+def get_all_workflow_runs(owner, repo, token):
+    """Get all workflow runs for a given owner, repo, and token.
+
+    Args:
+        owner (str): The owner of the repository.
+        repo (str): The repository name.
+        token (str): The GitHub token for authentication.
+
+    Returns:
+        list: A list of all workflow runs for the given repository.
+
+    Raises:
+        requests.HTTPError: If the request to the GitHub API fails.
+    """
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json"
     }
-    results = []
 
-    response = requests.get(endpoint, headers=headers, timeout=10)
-    if response.status_code != 200:
-        logger.error("GitHub API returned status code %d", response.status_code)
-    else:
-        workflows = response.json()["workflows"]
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = []
-            for workflow in workflows:
-                future = executor.submit(requests.get, f"{workflow['url']}/runs", headers=headers, timeout=10)
-                futures.append(future)
-            for future in futures:
-                response = future.result()
-                if response is None:
-                    logger.error("Failed to get response from GitHub API")
-                elif response.status_code != 200:
-                    logger.error("GitHub API returned status code %d", response.status_code)
-                else:
-                    data = response.json()
-                    results += data["workflow_runs"]
+    workflows = get_workflows(owner, repo, headers)
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = [executor.submit(get_workflow_runs, workflow, headers) for workflow in workflows]
+
+    results = []
+    for future in futures:
+        data = future.result()
+        results += data
 
     return results
 
 
 @app.route('/')
 def index():
+    """Endpoint for generating the CCTray XML.
+
+    Returns:
+        flask.Response: The XML response containing the project information.
+    """
     owner = request.args.get("owner") or request.form.get('owner')
     repo = request.args.get("repo") or request.form.get('repo')
     token = os.environ.get("GITHUB_TOKEN")
@@ -54,9 +102,8 @@ def index():
         logger.warning("Missing parameter(s) or Environment Variable")
         return make_response("Missing parameter(s)", 400)
 
-    data = get_workflow_runs(owner, repo, token)
+    data = get_all_workflow_runs(owner, repo, token)
 
-    # Sort workflow runs by 'updated_at' timestamp in descending order
     workflow_runs = sorted(data, key=lambda run: run["updated_at"], reverse=True)
 
     root = ET.Element("Projects")
@@ -69,7 +116,7 @@ def index():
             project = ET.SubElement(root, "Project")
             project.set("name", project_name)
 
-            # Map 'status' field to 'activity'
+            # Map 'Github' attributes to 'CCTray'
             if run["status"] == "completed":
                 if run["conclusion"] == "success":
                     project.set("activity", "Sleeping")
@@ -89,7 +136,6 @@ def index():
     response = make_response(ET.tostring(root).decode())
     response.headers['Content-Type'] = 'application/xml'
 
-    # Log request URI and response code
     logger.info("Request URI: %s Response Code: %d", request.path, response.status_code)
 
 
@@ -98,12 +144,19 @@ def index():
 
 @app.errorhandler(Exception)
 def handle_error(exception):
-    # Log the error
-    logger.error("An error occurred: %s", str(exception))
+    """Error handler for handling exceptions raised in the application.
 
+    Args:
+        exception (Exception): The exception object.
+
+    Returns:
+        str: The error message response.
+    """
+    logger.error("An error occurred: %s", str(exception))
     return "An error occurred.", 500
 
 
 if __name__ == '__main__':
     from waitress import serve
+
     serve(app, host='0.0.0.0', port=8000)
