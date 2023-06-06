@@ -1,4 +1,6 @@
 fileignoreconfig:
+- filename: README.md
+  checksum: 2779a70f5ec6f2712c8f54a7dc7bee58311474a55390c4a87c60bc861c70ef34
 - filename: app.py
-  checksum: 31c4fd4cf73838c756706736591971ffd4ea63de9c40b5717b57e640076df13b
-version: "2.0"
+  checksum: 91c3d92e2dd0753d547083695b095a049a2709314bd906c968b7222074179693
+version: "3.0"

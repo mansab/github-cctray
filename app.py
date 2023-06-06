@@ -6,11 +6,16 @@ from concurrent.futures import ThreadPoolExecutor
 import xml.etree.ElementTree as ET
 import requests
 from flask import Flask, request, make_response
+from flask_basicauth import BasicAuth
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask('github-cctray')
+app.config['BASIC_AUTH_USERNAME'] = os.environ.get("BASIC_AUTH_USERNAME")
+app.config['BASIC_AUTH_PASSWORD'] = os.environ.get("BASIC_AUTH_PASSWORD")
+
+basic_auth = BasicAuth(app)
 
 API_BASE_URL = "https://api.github.com"
 MAX_WORKERS = 10
@@ -88,12 +93,14 @@ def get_all_workflow_runs(owner, repo, token):
 
 
 @app.route('/')
+@basic_auth.required
 def index():
     """Endpoint for generating the CCTray XML.
 
     Returns:
         flask.Response: The XML response containing the project information.
     """
+
     owner = request.args.get("owner") or request.form.get('owner')
     repo = request.args.get("repo") or request.form.get('repo')
     token = os.environ.get("GITHUB_TOKEN")

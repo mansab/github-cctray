@@ -10,11 +10,16 @@ class TestApp(unittest.TestCase):
     def setUp(self):
         """Set up the test environment."""
         app.testing = True
+        app.config['BASIC_AUTH_USERNAME'] = 'user'
+        app.config['BASIC_AUTH_PASSWORD'] = 'pass'
         self.client = app.test_client()
+        self.headers = {
+            'Authorization': 'Basic dXNlcjpwYXNz'
+        }
 
     def test_index_missing_parameters(self):
         """Test handling missing parameters in the index route."""
-        response = self.client.get('/')
+        response = self.client.get('/', headers=self.headers)
         self.assertEqual(response.status_code, 400)
         self.assertIn(b"Missing parameter(s)", response.data)
 
@@ -30,7 +35,7 @@ class TestApp(unittest.TestCase):
                 "html_url": "https://github.com/owner/repo/actions/runs/1234"
             }
         ]
-        response = self.client.get('/?owner=owner&repo=repo')
+        response = self.client.get('/?owner=owner&repo=repo', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'<Project', response.data)
         self.assertIn(b'name="repo/CI"', response.data)
@@ -50,7 +55,7 @@ class TestApp(unittest.TestCase):
                 "html_url": "https://github.com/owner/repo/actions/runs/1234"
             }
         ]
-        response = self.client.get('/?owner=owner&repo=repo')
+        response = self.client.get('/?owner=owner&repo=repo', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'<Project', response.data)
         self.assertIn(b'lastBuildStatus="Unknown"', response.data)
@@ -59,7 +64,7 @@ class TestApp(unittest.TestCase):
     def test_index_failed_response(self, mock_get_all_workflow_runs):
         """Test failed response in the index route."""
         mock_get_all_workflow_runs.return_value = []
-        response = self.client.get('/?owner=owner&repo=repo')
+        response = self.client.get('/?owner=owner&repo=repo', headers=self.headers)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'<Projects />', response.data)
 

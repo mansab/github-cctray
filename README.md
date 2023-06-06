@@ -34,7 +34,11 @@ docker build -t github-cctray:latest .
 * Launch the Docker container
 
 ```bash
- docker run -p 8000:8000 -e GITHUB_TOKEN="<your_token>" github-cctray:latest
+ docker run -p 8000:8000 \
+            -e GITHUB_TOKEN="<your_token>" \
+            -e BASIC_AUTH_USERNAME="<your_username>" \
+            -e BASIC_AUTH_PASSWORD="<your_password>" \
+            github-cctray:latest
 ```
 
 # Usage
@@ -132,6 +136,8 @@ pip install -r requirements.txt
 
 ```bash
 export GITHUB_TOKEN=<token>
+export BASIC_AUTH_USERNAME=<user>
+export BASIC_AUTH_PASSWORD=<pass>
 python app.py
 ```
 
