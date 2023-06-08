@@ -17,6 +17,12 @@ class TestApp(unittest.TestCase):
             'Authorization': 'Basic dXNlcjpwYXNz'
         }
 
+    def test_health_endpoint(self):
+        """Test health check status & version in the health route."""
+        response = self.client.get('/health')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'{"status":"ok","version":"2.2.0"}', response.data)
+
     def test_index_missing_parameters(self):
         """Test handling missing parameters in the index route."""
         response = self.client.get('/', headers=self.headers)

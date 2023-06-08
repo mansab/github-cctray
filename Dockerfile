@@ -18,6 +18,7 @@ WORKDIR /app
 
 COPY --from=build /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
 COPY app.py ./
+COPY CHANGELOG.md ./
 
 RUN chown -R app:app /app
 

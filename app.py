@@ -1,11 +1,12 @@
 """App Module"""
 import os
+import re
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
 import xml.etree.ElementTree as ET
 import requests
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, jsonify
 from flask_basicauth import BasicAuth
 
 logging.basicConfig(level=logging.INFO)
@@ -147,6 +148,29 @@ def index():
 
 
     return response
+
+
+@app.route('/health')
+def health():
+    """Endpoint for checking the health status.
+
+    Returns:
+        flask.Response: JSON response containing the status and version.
+    """
+
+    with open('CHANGELOG.md', 'r', encoding='utf-8') as changelog_file:
+        changelog_content = changelog_file.read()
+
+    latest_version_match = re.search(r'##\s*(\d+\.\d+\.\d+)', changelog_content)
+    latest_version = latest_version_match.group(1) if latest_version_match else 'Unknown'
+
+
+    response = {
+        'status': 'ok',
+        'version': f'{latest_version}'
+    }
+
+    return jsonify(response)
 
 
 @app.errorhandler(Exception)
