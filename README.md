@@ -117,6 +117,36 @@ Attributes are returned as follows:
   </tbody>
 </table>
 
+## Health check
+
+The App has an health endpoint which returns the status and version of the app
+
+```bash
+curl -X GET http://localhost:8000/health
+```
+
+
+## Response
+
+```
+{"status":"ok","version":"2.2.0"}
+```
+
+## Rate Limiting
+
+Github has Rate Limiting for their APIs, to check if you are rate limited, use this endpoint
+
+```bash
+curl -X GET http://localhost:8000/limit
+```
+
+
+## Response
+
+```
+{"rate_limit":{"limit":5000,"remaining":1724,"reset":1686920826,"reset_cest":"2023-06-16 15:07:06 UTC+02:00+0200","used":3276},"status":"ok"}
+```
+
 # Development Setup
  
 * Activate [Python virtualenv](https://python.land/virtual-environments/virtualenv)

@@ -2,6 +2,7 @@
 import os
 import re
 import logging
+import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 import xml.etree.ElementTree as ET
@@ -15,6 +16,8 @@ logger = logging.getLogger(__name__)
 app = Flask('github-cctray')
 app.config['BASIC_AUTH_USERNAME'] = os.environ.get("BASIC_AUTH_USERNAME")
 app.config['BASIC_AUTH_PASSWORD'] = os.environ.get("BASIC_AUTH_PASSWORD")
+
+token = os.environ.get("GITHUB_TOKEN")
 
 basic_auth = BasicAuth(app)
 
@@ -104,7 +107,6 @@ def index():
 
     owner = request.args.get("owner") or request.form.get('owner')
     repo = request.args.get("repo") or request.form.get('repo')
-    token = os.environ.get("GITHUB_TOKEN")
 
     if not owner or not repo or not token:
         logger.warning("Missing parameter(s) or Environment Variable")
@@ -172,6 +174,46 @@ def health():
 
     return jsonify(response)
 
+@app.route('/limit')
+def limit():
+    """Endpoint for checking the rate limit status.
+
+    Returns:
+        flask.Response: JSON response containing rate limiting information.
+    """
+
+    headers = {
+        'Accept': 'application/vnd.github+json',
+        "Authorization": f"Bearer {token}",
+        'X-GitHub-Api-Version': '2022-11-28'
+    }
+    url = 'https://api.github.com/rate_limit'
+    response = requests.get(url, headers=headers, timeout=TIMEOUT)
+
+    if response.status_code == 200:
+        rate = response.json().get('rate', {})
+        reset_unix_time = rate.get('reset', 0)
+        reset_datetime = datetime.datetime.fromtimestamp(reset_unix_time)
+        reset_cest = reset_datetime.astimezone(datetime.timezone(datetime.timedelta(hours=2)))
+        rate['reset_cest'] = reset_cest.strftime('%Y-%m-%d %H:%M:%S %Z%z')
+
+        if rate.get('remaining', 0) == 0:
+            response = {
+                'status': 'rate_limited',
+                'rate_limit': rate
+            }
+        else:
+            response = {
+                'status': 'ok',
+                'rate_limit': rate
+            }
+    else:
+        response = {
+            'status': 'ok',
+            'rate_limit': {'error': 'Failed to retrieve rate limit information'}
+        }
+
+    return jsonify(response)
 
 @app.errorhandler(Exception)
 def handle_error(exception):
@@ -184,7 +226,8 @@ def handle_error(exception):
         str: The error message response.
     """
     logger.error("An error occurred: %s", str(exception))
-    return "An error occurred.", 500
+    error_message = f"An error occurred: {str(exception)}"
+    return error_message, 500
 
 
 if __name__ == '__main__':
