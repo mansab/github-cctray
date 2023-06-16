@@ -17,13 +17,23 @@ app = Flask('github-cctray')
 app.config['BASIC_AUTH_USERNAME'] = os.environ.get("BASIC_AUTH_USERNAME")
 app.config['BASIC_AUTH_PASSWORD'] = os.environ.get("BASIC_AUTH_PASSWORD")
 
-token = os.environ.get("GITHUB_TOKEN")
-
 basic_auth = BasicAuth(app)
 
 API_BASE_URL = "https://api.github.com"
 MAX_WORKERS = 10
 TIMEOUT = 10
+
+def get_token():
+    """Sets the Github API token
+
+    Returns:
+        token: Either from the query parameter or the environment variable
+    """
+    query_token = request.args.get("token")
+
+    if query_token:
+        return query_token
+    return os.environ.get("GITHUB_TOKEN")
 
 
 def get_workflows(owner, repo, headers):
@@ -104,9 +114,9 @@ def index():
     Returns:
         flask.Response: The XML response containing the project information.
     """
-
     owner = request.args.get("owner") or request.form.get('owner')
     repo = request.args.get("repo") or request.form.get('repo')
+    token = get_token()
 
     if not owner or not repo or not token:
         logger.warning("Missing parameter(s) or Environment Variable")
@@ -159,7 +169,6 @@ def health():
     Returns:
         flask.Response: JSON response containing the status and version.
     """
-
     with open('CHANGELOG.md', 'r', encoding='utf-8') as changelog_file:
         changelog_content = changelog_file.read()
 
@@ -175,12 +184,14 @@ def health():
     return jsonify(response)
 
 @app.route('/limit')
+@basic_auth.required
 def limit():
     """Endpoint for checking the rate limit status.
 
     Returns:
         flask.Response: JSON response containing rate limiting information.
     """
+    token = get_token()
 
     headers = {
         'Accept': 'application/vnd.github+json',

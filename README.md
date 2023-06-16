@@ -19,6 +19,7 @@ You can use the App to configure [CCTray Clients](https://cctray.org/clients/):
 * Github Personal Access Token
     * [FGPAT (recommended) or PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
     * Read-Only access to Actions (Workflows, workflow runs and artifacts) required for Private repos.
+    * Please take into account the (Github API rate limit)[https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting] for authentication tokens.
 * Development
     * Python 3.9
     * pip
@@ -47,23 +48,27 @@ Once up, the App binds to port `8000` by default and should be available at: htt
 
 ## Making an HTTP request
 
-The App accepts GET and POST requests with **two manadatory parameters**:
+The App accepts GET requests with following parameters:
+
+**manadatory parameters**
 
 * `owner` - Organisation or User who owns the repository
 * `repo` - Name of the Repository
 
+**optional parameter**
+
+* `token` - If you want to use FGPAT per user to access the API, to overcome Github API rate limiting (this takes precedence over the token set in the env var).
+
 For Example:
 
-* GET
-
+* Mandatory Parameters
 ```bash
 curl -X GET http://localhost:8000?owner=<repo_owner>&repo=<repository_name>
 ```
 
-* POST
-
+* Optional Parameter
 ```bash
-curl -d "owner=<repo_owner>&repo=<repository_name>" -X POST http://localhost:8000
+curl -X GET http://localhost:8000?owner=<repo_owner>&repo=<repository_name&token=<your_token>
 ```
 
 ## Response
