@@ -141,10 +141,15 @@ curl -X GET http://localhost:8000/health
 
 Github has Rate Limiting for their APIs, to check if you are rate limited, use this endpoint
 
+* With token in the environment variable
 ```bash
 curl -X GET http://localhost:8000/limit
 ```
 
+* With token in the query parameter
+```bash
+curl -X GET http://localhost:8000/limit?token=<your_token>
+```
 
 ### Response
 
