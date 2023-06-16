@@ -126,7 +126,7 @@ curl -X GET http://localhost:8000/health
 ```
 
 
-## Response
+### Response
 
 ```
 {"status":"ok","version":"2.2.0"}
@@ -141,7 +141,7 @@ curl -X GET http://localhost:8000/limit
 ```
 
 
-## Response
+### Response
 
 ```
 {"rate_limit":{"limit":5000,"remaining":1724,"reset":1686920826,"reset_cest":"2023-06-16 15:07:06 UTC+02:00+0200","used":3276},"status":"ok"}
