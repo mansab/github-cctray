@@ -16,27 +16,56 @@ You can use the App to configure [CCTray Clients](https://cctray.org/clients/):
 
 ## Prerequisites
 
-* Github Personal Access Token
-    * [FGPAT (recommended) or PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
-    * Read-Only access to Actions (Workflows, workflow runs and artifacts) required for Private repos.
-    * Please take into account the [Github API rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting) for authentication tokens.
-* Development
-    * Python 3.9
-    * pip
+### Authentication Token
+
+To authenticate with Github API, the app needs a `token`, it can be provided by **either** of the following methods
+#### Github Personal Access Token
+* [FGPAT (recommended) or PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+* Read-Only access to Actions (Workflows, workflow runs and artifacts) required for Private repos.
+* You will need to set: `GITHUB_TOKEN="<your_token>"` as the environment variable.
+
+#### Github APP (Recommened)
+* [Create a Github APP](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app) and grant Read-Only access to Github Actions
+* The Github APP should be installed on the Github Organization or Account with access to the required repositories.
+* You will need to set the following environment variable:
+```
+APP_AUTH_ID=<id_of_your_github_app>
+APP_AUTH_PRIVATE_KEY=<private_key_of_your_github_app>
+APP_AUTH_INSTALLATION_ID=<installtion_id_once_installed>
+```
+* Please refer to Github's offical documentation to know what these values are and where can you find them 
+
+**Please take into account the [Github API rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting) for authentication tokens.**
 
 ## With Docker
 
-* Build the Docker image
+### Build the Docker image
 
 ```bash
 docker build -t github-cctray:latest . 
 ```
 
-* Launch the Docker container
+### Launch the Docker container
+
+You can do this in two ways:
+
+* Personal Access Token method
 
 ```bash
  docker run -p 8000:8000 \
             -e GITHUB_TOKEN="<your_token>" \
+            -e BASIC_AUTH_USERNAME="<your_username>" \
+            -e BASIC_AUTH_PASSWORD="<your_password>" \
+            github-cctray:latest
+```
+
+* Github App method
+
+```bash
+ docker run -p 8000:8000 \
+            -e APP_AUTH_ID="<id_of_your_github_app>" \
+            -e APP_AUTH_PRIVATE_KEY="<private_key_of_your_github_app>" \
+            -e APP_AUTH_INSTALLATION_ID="<installtion_id_once_installed>" \
             -e BASIC_AUTH_USERNAME="<your_username>" \
             -e BASIC_AUTH_PASSWORD="<your_password>" \
             github-cctray:latest
@@ -57,7 +86,7 @@ The App accepts GET requests with following parameters:
 
 **optional parameter**
 
-* `token` - If you want to use FGPAT per user to access the API, to overcome Github API rate limiting (this takes precedence over the token set in the env var).
+* `token` - If you want to use FGPAT per user to access the API, to overcome Github API rate limiting (this takes precedence over the token/Github App auth set in the env var).
 
 For Example:
 
@@ -158,7 +187,9 @@ curl -X GET http://localhost:8000/limit?token=<your_token>
 ```
 
 # Development Setup
- 
+
+* Python 3.9
+* pip 
 * Activate [Python virtualenv](https://python.land/virtual-environments/virtualenv)
 
 ```bash
@@ -175,10 +206,10 @@ pip install -r requirements.txt
 * Execute
 
 ```bash
-export GITHUB_TOKEN=<token>
-export BASIC_AUTH_USERNAME=<user>
-export BASIC_AUTH_PASSWORD=<pass>
-python app.py
+* set necessary env variable to authenticate with Github (see Prerequisites)
+* export BASIC_AUTH_USERNAME=<user>
+* export BASIC_AUTH_PASSWORD=<pass>
+* python app.py
 ```
 
 # Configuring a Client 
