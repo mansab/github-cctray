@@ -1,3 +1,8 @@
+## 3.0.0
+
+* Add support for Github App based authentication
+* Return git commit ID as buildlabel in the XML
+
 ## 2.2.0
 
 Added /health endpoint

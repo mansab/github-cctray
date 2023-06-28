@@ -2,10 +2,12 @@
 import os
 import re
 import logging
+import argparse
 import datetime
+import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 
-import xml.etree.ElementTree as ET
+import jwt
 import requests
 from flask import Flask, request, make_response, jsonify
 from flask_basicauth import BasicAuth
@@ -24,16 +26,61 @@ MAX_WORKERS = 10
 TIMEOUT = 10
 
 def get_token():
-    """Sets the Github API token
+    """Sets the GitHub API token based on the selected mode
 
     Returns:
-        token: Either from the query parameter or the environment variable
+        token: Either the personal access token or the GitHub App access token
     """
-    query_token = request.args.get("token")
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--mode",
+        choices=[
+            "pat-auth",
+            "app-auth"],
+        default="pat-auth",
+        help="Authentication mode")
+    args = parser.parse_args()
 
-    if query_token:
-        return query_token
-    return os.environ.get("GITHUB_TOKEN")
+    token = request.args.get("token")
+
+    if token:
+        return token
+    elif args.mode == "pat-auth":
+        token = os.environ.get("GITHUB_TOKEN")
+    elif args.mode == "app-auth":
+        app_auth_id = os.environ.get("APP_AUTH_ID")
+        app_auth_private_key = os.environ.get("APP_AUTH_PRIVATE_KEY")
+        app_auth_installation_id = os.environ.get("APP_AUTH_INSTALLATION_ID")
+        app_auth_base_url = "https://api.github.com"
+
+        now = datetime.datetime.utcnow()
+        iat = int((now - datetime.datetime(1970, 1, 1)).total_seconds())
+        exp = iat + 600
+        payload = {
+            "iat": iat,
+            "exp": exp,
+            "iss": app_auth_id
+        }
+        encoded_jwt = jwt.encode(
+            payload,
+            app_auth_private_key,
+            algorithm="RS256")
+        headers = {
+            "Authorization": f"Bearer {encoded_jwt}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+        response = requests.post(
+            f"{app_auth_base_url}/app/installations/{app_auth_installation_id}/access_tokens",
+            headers=headers,
+            timeout=TIMEOUT)
+
+        if response.status_code == 201:
+            token = response.json()["token"]
+        else:
+            raise Exception(
+                f"Failed to obtain access token: {response.status_code} {response.text}")
+
+    return token
 
 
 def get_workflows(owner, repo, headers):
@@ -96,7 +143,11 @@ def get_all_workflow_runs(owner, repo, token):
 
     workflows = get_workflows(owner, repo, headers)
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = [executor.submit(get_workflow_runs, workflow, headers) for workflow in workflows]
+        futures = [
+            executor.submit(
+                get_workflow_runs,
+                workflow,
+                headers) for workflow in workflows]
 
     results = []
     for future in futures:
@@ -124,7 +175,10 @@ def index():
 
     data = get_all_workflow_runs(owner, repo, token)
 
-    workflow_runs = sorted(data, key=lambda run: run["updated_at"], reverse=True)
+    workflow_runs = sorted(
+        data,
+        key=lambda run: run["updated_at"],
+        reverse=True)
 
     root = ET.Element("Projects")
     project_names = set()  # Set to store unique project names
@@ -152,12 +206,14 @@ def index():
                         else "Unknown")
             project.set("lastBuildTime", run["updated_at"])
             project.set("webUrl", run["html_url"])
+            short_commit_id = run["head_commit"]["id"][:8]
+            project.set("lastBuildLabel", short_commit_id)
 
     response = make_response(ET.tostring(root).decode())
     response.headers['Content-Type'] = 'application/xml'
 
-    logger.info("Request URI: %s Response Code: %d", request.path, response.status_code)
-
+    logger.info("Request URI: %s Response Code: %d",
+                request.path, response.status_code)
 
     return response
 
@@ -172,9 +228,10 @@ def health():
     with open('CHANGELOG.md', 'r', encoding='utf-8') as changelog_file:
         changelog_content = changelog_file.read()
 
-    latest_version_match = re.search(r'##\s*(\d+\.\d+\.\d+)', changelog_content)
-    latest_version = latest_version_match.group(1) if latest_version_match else 'Unknown'
-
+    latest_version_match = re.search(
+        r'##\s*(\d+\.\d+\.\d+)', changelog_content)
+    latest_version = latest_version_match.group(
+        1) if latest_version_match else 'Unknown'
 
     response = {
         'status': 'ok',
@@ -182,6 +239,7 @@ def health():
     }
 
     return jsonify(response)
+
 
 @app.route('/limit')
 @basic_auth.required
@@ -192,7 +250,6 @@ def limit():
         flask.Response: JSON response containing rate limiting information.
     """
     token = get_token()
-
     headers = {
         'Accept': 'application/vnd.github+json',
         "Authorization": f"Bearer {token}",
@@ -205,7 +262,8 @@ def limit():
         rate = response.json().get('rate', {})
         reset_unix_time = rate.get('reset', 0)
         reset_datetime = datetime.datetime.fromtimestamp(reset_unix_time)
-        reset_cest = reset_datetime.astimezone(datetime.timezone(datetime.timedelta(hours=2)))
+        reset_cest = reset_datetime.astimezone(
+            datetime.timezone(datetime.timedelta(hours=2)))
         rate['reset_cest'] = reset_cest.strftime('%Y-%m-%d %H:%M:%S %Z%z')
 
         if rate.get('remaining', 0) == 0:
@@ -219,12 +277,11 @@ def limit():
                 'rate_limit': rate
             }
     else:
-        response = {
-            'status': 'ok',
-            'rate_limit': {'error': 'Failed to retrieve rate limit information'}
-        }
+        response = {'status': 'ok', 'rate_limit': {
+            'error': 'Failed to retrieve rate limit information'}}
 
     return jsonify(response)
+
 
 @app.errorhandler(Exception)
 def handle_error(exception):

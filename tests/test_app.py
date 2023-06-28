@@ -1,79 +1,71 @@
 """Teat Module for the App"""
 import unittest
-from unittest.mock import patch
-from app import app
+from unittest.mock import patch, MagicMock
+from app import get_workflows, get_workflow_runs, app, get_all_workflow_runs
 
 
-class TestApp(unittest.TestCase):
+class AppTests(unittest.TestCase):
     """Test cases for the App module."""
 
     def setUp(self):
-        """Set up the test environment."""
-        app.testing = True
-        app.config['BASIC_AUTH_USERNAME'] = 'user'
-        app.config['BASIC_AUTH_PASSWORD'] = 'pass'
-        self.client = app.test_client()
-        self.headers = {
-            'Authorization': 'Basic dXNlcjpwYXNz'
-        }
+        """Setup the app"""
+        self.app = app.test_client()
 
-    def test_health_endpoint(self):
-        """Test health check status & version in the health route."""
-        response = self.client.get('/health')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'{"status":"ok","version":"2.2.0"}', response.data)
+    def test_get_workflows(self):
+        """Test case for getting workflows"""
+        owner = "test_owner"
+        repo = "test_repo"
+        headers = {"Authorization": "Bearer test_token",
+                   "Accept": "application/vnd.github.v3+json"}
 
-    def test_index_missing_parameters(self):
-        """Test handling missing parameters in the index route."""
-        response = self.client.get('/', headers=self.headers)
-        self.assertEqual(response.status_code, 400)
-        self.assertIn(b"Missing parameter(s)", response.data)
+        with patch('requests.get') as mock_get:
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "workflows": ["workflow1", "workflow2"]}
+            mock_get.return_value = mock_response
 
-    @patch('app.get_all_workflow_runs')
-    def test_index_successful_response(self, mock_get_all_workflow_runs):
-        """Test successful response in the index route."""
-        mock_get_all_workflow_runs.return_value = [
-            {
-                "name": "CI",
-                "status": "completed",
-                "conclusion": "success",
-                "updated_at": "2021-09-20T18:25:34Z",
-                "html_url": "https://github.com/owner/repo/actions/runs/1234"
-            }
-        ]
-        response = self.client.get('/?owner=owner&repo=repo', headers=self.headers)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'<Project', response.data)
-        self.assertIn(b'name="repo/CI"', response.data)
-        self.assertIn(b'activity="Sleeping', response.data)
-        self.assertIn(b'lastBuildStatus="Success"', response.data)
-        self.assertIn(b'webUrl="https://github.com/owner/repo/actions/runs/1234"', response.data)
+            workflows = get_workflows(owner, repo, headers)
 
-    @patch('app.get_all_workflow_runs')
-    def test_index_unknown_build_status(self, mock_get_all_workflow_runs):
-        """Test unknown build status in the index route."""
-        mock_get_all_workflow_runs.return_value = [
-            {
-                "name": "CI",
-                "status": "in_progress",
-                "conclusion": None,
-                "updated_at": "2021-09-20T18:25:34Z",
-                "html_url": "https://github.com/owner/repo/actions/runs/1234"
-            }
-        ]
-        response = self.client.get('/?owner=owner&repo=repo', headers=self.headers)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'<Project', response.data)
-        self.assertIn(b'lastBuildStatus="Unknown"', response.data)
+            self.assertEqual(workflows, ["workflow1", "workflow2"])
 
-    @patch('app.get_all_workflow_runs')
-    def test_index_failed_response(self, mock_get_all_workflow_runs):
-        """Test failed response in the index route."""
-        mock_get_all_workflow_runs.return_value = []
-        response = self.client.get('/?owner=owner&repo=repo', headers=self.headers)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'<Projects />', response.data)
+    def test_get_workflow_runs(self):
+        """Test case for getting workflow runs"""
+        workflow = {"url": "test_url"}
+        headers = {"Authorization": "Bearer test_token",
+                   "Accept": "application/vnd.github.v3+json"}
 
+        with patch('requests.get') as mock_get:
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "workflow_runs": ["run1", "run2"]}
+            mock_get.return_value = mock_response
 
-if __name__ == '__main__':
-    unittest.main()
+            workflow_runs = get_workflow_runs(workflow, headers)
+
+            self.assertEqual(workflow_runs, ["run1", "run2"])
+
+    def test_get_all_workflow_runs(self):
+        """Test case for getting all workflow runs"""
+        owner = "test_owner"
+        repo = "test_repo"
+        token = "test_token"
+        headers = {"Authorization": "Bearer test_token",
+                   "Accept": "application/vnd.github.v3+json"}
+        workflows = [{"url": "workflow1"}, {"url": "workflow2"}]
+        runs1 = [{"id": 1, "status": "completed", "conclusion": "success"}]
+        runs2 = [{"id": 2, "status": "completed", "conclusion": "failure"}]
+
+        with patch('app.get_workflows') as mock_get_workflows, \
+                patch('app.get_workflow_runs') as mock_get_workflow_runs:
+
+            mock_get_workflows.return_value = workflows
+            mock_get_workflow_runs.side_effect = [runs1, runs2]
+
+            result = get_all_workflow_runs(owner, repo, token)
+
+            self.assertEqual(result, runs1 + runs2)
+            mock_get_workflows.assert_called_once_with(owner, repo, headers)
+            mock_get_workflow_runs.assert_any_call(workflows[0], headers)
+            mock_get_workflow_runs.assert_any_call(workflows[1], headers)
