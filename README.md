@@ -222,10 +222,21 @@ You can configure a CCTray client by adding above App's URL with parameters and 
 
 In the below snapshots you can see CCMenu configured against this project's repository workflows as an example:
 
-## Desktop Menu Bar
+### Desktop Menu Bar
 
 <img src="./images/ccmenu_desktop_menu_bar.png?raw=true" />
 
-## Project Configuration
+### Project Configuration
 
 <img src="./images/ccmenu_projects_configuration.png?raw=true" />
+
+## Nevergreen
+
+### Dashboard
+
+<img src="./images/nevergreen_dashboard.png?raw=true" />
+
+### Configuration
+
+<img src="./images/nevergreen_dashboard_configuration.png?raw=true" />
+
