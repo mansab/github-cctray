@@ -2,4 +2,5 @@ requests
 flask
 Flask-BasicAuth
 waitress
-jwt
+PyJWT
+cryptography

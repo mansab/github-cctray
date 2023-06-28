@@ -70,7 +70,7 @@ You can do this in two ways:
             -e APP_AUTH_INSTALLATION_ID="<installtion_id_once_installed>" \
             -e BASIC_AUTH_USERNAME="<your_username>" \
             -e BASIC_AUTH_PASSWORD="<your_password>" \
-            github-cctray:latest
+            github-cctray:latest --mode app-auth
 ```
 
 # Usage
@@ -211,7 +211,7 @@ pip install -r requirements.txt
 * set necessary env variable to authenticate with Github (see Prerequisites)
 * export BASIC_AUTH_USERNAME=<user>
 * export BASIC_AUTH_PASSWORD=<pass>
-* python app.py
+* python app.py --mode [pat-auth|app-auth] # pat-auth is the default mode if no mode is set
 ```
 
 # Configuring a Client 
