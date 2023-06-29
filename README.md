@@ -10,8 +10,8 @@ A lightweight App that provides [all Github Workflows of a Repository](https://d
 Visibility for your Github Actions & Workflows in one place.
 
 You can use the App to configure [CCTray Clients](https://cctray.org/clients/):
-* [CCMenu](https://ccmenu.org/) `[tested]` ([more info](#configuring-a-client-ccmenu))
-* [Nevergreen Dashboard](https://github.com/build-canaries/nevergreen) `[tested]`
+* [CCMenu](https://ccmenu.org/) `[tested]` ([more info](#ccmenu))
+* [Nevergreen Dashboard](https://github.com/build-canaries/nevergreen) `[tested]` ([more info](#nevergreen))
 # Running the App
 
 ## Prerequisites
