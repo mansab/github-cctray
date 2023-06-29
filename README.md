@@ -29,7 +29,7 @@ it can be provided by **either** of the following methods:
 #### Github APP (Recommened)
 * [Create a Github APP](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app) and grant Read-Only access to Github Actions
 * The Github APP should be installed on the Github Organization or Account with access to the required repositories.
-* You will need to set the following environment variable:
+* You will need to set the following environment variables:
 ```
 APP_AUTH_ID=<id_of_your_github_app>
 APP_AUTH_PRIVATE_KEY=<private_key_of_your_github_app>
