@@ -150,6 +150,11 @@ Attributes are returned as follows:
       <td>Exact URL of the Github Action run for a workflow</td>
       <td>string (URL)</td>
     </tr>
+    <tr>
+     <td>lastBuildLabel</td>
+     <td>Short commit ID associated with the last workflow run</td>
+     <td>string : Git SHA (8 char)</td>
+    </tr>
   </tbody>
 </table>
 
