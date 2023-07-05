@@ -25,4 +25,4 @@ jobs:
         pip install -r requirements.txt
     - name: Run the tests
       run: |
-        venv/bin/python -m unittest discover tests
+        venv/bin/python -m unittest discover .

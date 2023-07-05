@@ -6,7 +6,7 @@ FROM python:3.9-slim-buster AS build
 
 WORKDIR /app
 
-COPY requirements.txt ./
+COPY src/requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -17,8 +17,7 @@ RUN groupadd -r app && useradd --no-log-init -r -g app app
 WORKDIR /app
 
 COPY --from=build /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
-COPY app.py ./
-COPY CHANGELOG.md ./
+COPY src/* ./
 
 RUN chown -R app:app /app
 
