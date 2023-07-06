@@ -10,8 +10,12 @@ A lightweight App that provides [all Github Workflows of a Repository](https://d
 Visibility for your Github Actions & Workflows in one place.
 
 You can use the App to configure [CCTray Clients](https://cctray.org/clients/):
-* [CCMenu](https://ccmenu.org/) `[tested]` ([more info](#ccmenu))
-* [Nevergreen Dashboard](https://github.com/build-canaries/nevergreen) `[tested]` ([more info](#nevergreen))
+* [CCMenu](https://ccmenu.org/) `[tested]`
+* [Nevergreen Dashboard](https://github.com/build-canaries/nevergreen) `[tested]`
+
+<img src="https://github.com/mansab/github-cctray/raw/main/images/ccmenu_desktop_menu_bar.png?raw=true" width=40% height=50%> <img src="https://github.com/mansab/github-cctray/blob/main/images/ccmenu_projects_configuration.png?raw=true" width=40% height=50%>
+<img src="https://github.com/mansab/github-cctray/blob/main/images/nevergreen_dashboard.png?raw=true" width=40% height=50%> <img src="https://github.com/mansab/github-cctray/blob/main/images/nevergreen_dashboard_configuration.png?raw=true" width=40% height=50%>
+
 # Running the App
 
 ## Prerequisites
@@ -218,30 +222,4 @@ pip install -r requirements.txt
 * export BASIC_AUTH_PASSWORD=<pass>
 * python app.py --mode [pat-auth|app-auth] # pat-auth is the default mode if no mode is set
 ```
-
-# Configuring a Client 
-
-## CCMenu
-
-You can configure a CCTray client by adding above App's URL with parameters and select the required or all the workflows in your Github respository.
-
-In the below snapshots you can see CCMenu configured against this project's repository workflows as an example:
-
-### Desktop Menu Bar
-
-<img src="./images/ccmenu_desktop_menu_bar.png?raw=true" />
-
-### Project Configuration
-
-<img src="./images/ccmenu_projects_configuration.png?raw=true" />
-
-## Nevergreen
-
-### Dashboard
-
-<img src="./images/nevergreen_dashboard.png?raw=true" />
-
-### Configuration
-
-<img src="./images/nevergreen_dashboard_configuration.png?raw=true" />
 
