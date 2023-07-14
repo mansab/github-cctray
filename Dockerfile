@@ -14,12 +14,13 @@ FROM python:3.9-slim-buster AS app
 
 RUN groupadd -r app && useradd --no-log-init -r -g app app
 
-WORKDIR /app
-
 COPY --from=build /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
-COPY src/* ./
+COPY src /app/src
+COPY CHANGELOG.md /app
 
 RUN chown -R app:app /app
+
+WORKDIR /app/src
 
 USER app
 
