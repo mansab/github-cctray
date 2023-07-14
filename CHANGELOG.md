@@ -1,3 +1,7 @@
+## 3.1.1
+
+* Bug fix for the /health route
+
 ## 3.1.0
 
 * Modularize the source code
