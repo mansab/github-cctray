@@ -50,7 +50,7 @@ def get_token():
         token = GITHUB_TOKEN
     elif args.mode == "app-auth":
         app_auth_id = APP_AUTH_ID
-        APP_AUTH_PRIVATE_KEY_B64 = decode_base64(APP_AUTH_PRIVATE_KEY_B64)
+        app_auth_private_key_b64 = decode_base64(APP_AUTH_PRIVATE_KEY_B64)
         app_auth_installation_id = APP_AUTH_INSTALLATION_ID
         app_auth_base_url = APP_AUTH_BASE_URL
 
@@ -58,7 +58,7 @@ def get_token():
         iat = int((now - datetime.datetime(1970, 1, 1)).total_seconds())
         exp = iat + 600
         payload = {"iat": iat, "exp": exp, "iss": app_auth_id}
-        encoded_jwt = jwt.encode(payload, APP_AUTH_PRIVATE_KEY_B64, algorithm="RS256")
+        encoded_jwt = jwt.encode(payload, app_auth_private_key_b64, algorithm="RS256")
         headers = {
             "Authorization": f"Bearer {encoded_jwt}",
             "Accept": "application/vnd.github.v3+json",
