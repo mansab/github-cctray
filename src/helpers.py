@@ -1,15 +1,26 @@
 """Helpers Module"""
 import datetime
+import base64
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import jwt
 import requests
 from flask import request
 from config import (
-    API_BASE_URL, MAX_WORKERS, TIMEOUT, GITHUB_TOKEN,
-    APP_AUTH_ID, APP_AUTH_BASE_URL,
-    APP_AUTH_INSTALLATION_ID, APP_AUTH_PRIVATE_KEY
+    API_BASE_URL,
+    MAX_WORKERS,
+    TIMEOUT,
+    GITHUB_TOKEN,
+    APP_AUTH_ID,
+    APP_AUTH_BASE_URL,
+    APP_AUTH_INSTALLATION_ID,
+    B64_APP_AUTH_PRIVATE_KEY,
 )
+
+
+def decode_base64(value):
+    return base64.b64decode(value).decode("utf-8")
+
 
 def get_token():
     """Sets the GitHub API token based on the selected mode
@@ -20,11 +31,10 @@ def get_token():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--mode",
-        choices=[
-            "pat-auth",
-            "app-auth"],
+        choices=["pat-auth", "app-auth"],
         default="pat-auth",
-        help="Authentication mode")
+        help="Authentication mode",
+    )
     args = parser.parse_args()
 
     token = request.args.get("token")
@@ -35,38 +45,34 @@ def get_token():
         token = GITHUB_TOKEN
     elif args.mode == "app-auth":
         app_auth_id = APP_AUTH_ID
-        app_auth_private_key = APP_AUTH_PRIVATE_KEY
+        B64_APP_AUTH_PRIVATE_KEY = decode_base64(B64_APP_AUTH_PRIVATE_KEY)
         app_auth_installation_id = APP_AUTH_INSTALLATION_ID
         app_auth_base_url = APP_AUTH_BASE_URL
 
         now = datetime.datetime.utcnow()
         iat = int((now - datetime.datetime(1970, 1, 1)).total_seconds())
         exp = iat + 600
-        payload = {
-            "iat": iat,
-            "exp": exp,
-            "iss": app_auth_id
-        }
-        encoded_jwt = jwt.encode(
-            payload,
-            app_auth_private_key,
-            algorithm="RS256")
+        payload = {"iat": iat, "exp": exp, "iss": app_auth_id}
+        encoded_jwt = jwt.encode(payload, B64_APP_AUTH_PRIVATE_KEY, algorithm="RS256")
         headers = {
             "Authorization": f"Bearer {encoded_jwt}",
-            "Accept": "application/vnd.github.v3+json"
+            "Accept": "application/vnd.github.v3+json",
         }
         response = requests.post(
             f"{app_auth_base_url}/app/installations/{app_auth_installation_id}/access_tokens",
             headers=headers,
-            timeout=TIMEOUT)
+            timeout=TIMEOUT,
+        )
 
         if response.status_code == 201:
             token = response.json()["token"]
         else:
             raise Exception(
-                f"Failed to obtain access token: {response.status_code} {response.text}")
+                f"Failed to obtain access token: {response.status_code} {response.text}"
+            )
 
     return token
+
 
 def get_workflows(owner, repo, headers):
     """Get the workflows for a given owner and repo from the GitHub API.
@@ -123,16 +129,15 @@ def get_all_workflow_runs(owner, repo, token):
     """
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
 
     workflows = get_workflows(owner, repo, headers)
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [
-            executor.submit(
-                get_workflow_runs,
-                workflow,
-                headers) for workflow in workflows]
+            executor.submit(get_workflow_runs, workflow, headers)
+            for workflow in workflows
+        ]
 
     results = []
     for future in futures:

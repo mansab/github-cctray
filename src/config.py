@@ -10,6 +10,6 @@ BASIC_AUTH_PASSWORD = os.environ.get("BASIC_AUTH_PASSWORD")
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 APP_AUTH_ID = os.environ.get("APP_AUTH_ID")
-APP_AUTH_PRIVATE_KEY = os.environ.get("APP_AUTH_PRIVATE_KEY")
+B64_APP_AUTH_PRIVATE_KEY = os.environ.get("B64_APP_AUTH_PRIVATE_KEY")
 APP_AUTH_INSTALLATION_ID = os.environ.get("APP_AUTH_INSTALLATION_ID")
 APP_AUTH_BASE_URL = "https://api.github.com"
