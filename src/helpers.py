@@ -19,6 +19,11 @@ from config import (
 
 
 def decode_base64(value):
+    """Decodes a Base64 string
+
+    Returns:
+        value: Base64 Decoded value, utf-8 format.
+    """
     return base64.b64decode(value).decode("utf-8")
 
 
