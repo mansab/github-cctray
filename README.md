@@ -36,7 +36,7 @@ it can be provided by **either** of the following methods:
 * You will need to set the following environment variables:
 ```
 APP_AUTH_ID=<id_of_your_github_app>
-B64_APP_AUTH_PRIVATE_KEY=<private_key_of_your_github_app_bas64_encoded>
+APP_AUTH_PRIVATE_KEY_B64=<private_key_of_your_github_app_bas64_encoded>
 APP_AUTH_INSTALLATION_ID=<installtion_id_once_installed>
 ```
 * Please refer to Github's offical documentation to know what these values are and where can you find them 
@@ -70,7 +70,7 @@ You can do this in two ways:
 ```bash
  docker run -p 8000:8000 \
             -e APP_AUTH_ID="<id_of_your_github_app>" \
-            -e B64_APP_AUTH_PRIVATE_KEY="<private_key_of_your_github_app_base64_encoded>" \
+            -e APP_AUTH_PRIVATE_KEY_B64="<private_key_of_your_github_app_base64_encoded>" \
             -e APP_AUTH_INSTALLATION_ID="<installtion_id_once_installed>" \
             -e BASIC_AUTH_USERNAME="<your_username>" \
             -e BASIC_AUTH_PASSWORD="<your_password>" \
