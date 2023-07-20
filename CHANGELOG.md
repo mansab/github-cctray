@@ -1,3 +1,8 @@
+## 3.2.0
+
+* Expect a Base64 encoded private key of Github App for consistency
+* Improve logs
+
 ## 3.1.1
 
 * Bug fix for the /health route
