@@ -1,5 +1,6 @@
 """Helpers Module"""
 import datetime
+import re
 import base64
 import argparse
 from concurrent.futures import ThreadPoolExecutor
@@ -25,6 +26,15 @@ def decode_base64(value):
         value: Base64 Decoded value, utf-8 format.
     """
     return base64.b64decode(value).decode("utf-8")
+
+
+def redact_token(uri):
+    """Redacts the 'token' value from the URI
+
+    Returns:
+        uri: token=<REDACTED> 
+    """
+    return re.sub(r'(\?|&)token=.*?(&|$)', r'\1token=<REDACTED>\2', uri)
 
 
 def get_token():

@@ -6,7 +6,7 @@ import datetime
 import requests
 from flask import Flask, request, make_response, jsonify
 from flask_basicauth import BasicAuth
-from helpers import get_token, get_all_workflow_runs
+from helpers import get_token, get_all_workflow_runs, redact_token
 from config import BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, TIMEOUT
 
 logging.basicConfig(level=logging.INFO)
@@ -74,7 +74,7 @@ def index():
     response.headers['Content-Type'] = 'application/xml'
 
     logger.info("Request URI: %s Response Code: %d",
-                request.path, response.status_code)
+                redact_token(request.full_path), response.status_code)
 
     return response
 
@@ -154,6 +154,7 @@ def handle_error(exception):
     Returns:
         str: The error message response.
     """
-    logger.error("An error occurred: %s", str(exception))
+    logger.error("An error occurred: %s Request URI: %s", str(exception),
+                 redact_token(request.full_path))
     error_message = f"An error occurred: {str(exception)}"
     return error_message, 500
