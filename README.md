@@ -31,7 +31,7 @@ it can be provided by **either** of the following methods:
 * You will need to set: `GITHUB_TOKEN="<your_token>"` as the environment variable.
 
 #### Github APP (Recommened)
-* [Create a Github APP](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app) and grant Read-Only access to Github Actions
+* [Use cctray-auth Github APP](https://github.com/apps/cctray-auth) to grant Read-Only access to Github Actions on your repositories.
 * The Github APP should be installed on the Github Organization or Account with access to the required repositories.
 * You will need to set the following environment variables:
 ```
@@ -39,7 +39,7 @@ APP_AUTH_ID=<id_of_your_github_app>
 APP_AUTH_PRIVATE_KEY_B64=<private_key_of_your_github_app_bas64_encoded>
 APP_AUTH_INSTALLATION_ID=<installtion_id_once_installed>
 ```
-* Please refer to Github's offical documentation to know what these values are and where can you find them 
+* Please refer to [Github's offical documentation](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app) to know what these values are and where can you find them 
 
 **Please take into account the [Github API rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting) for authentication tokens.**
 
