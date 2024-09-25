@@ -4,9 +4,10 @@ import logging
 import xml.etree.ElementTree as ET
 import datetime
 import requests
+import threading
 from flask import Flask, request, make_response, jsonify
 from flask_basicauth import BasicAuth
-from helpers import get_token, get_all_workflow_runs, redact_token
+from helpers import get_token, get_all_workflow_runs, redact_token, authenticate_with_device_flow
 from config import BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, TIMEOUT
 
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +18,7 @@ app.config['BASIC_AUTH_USERNAME'] = BASIC_AUTH_USERNAME
 app.config['BASIC_AUTH_PASSWORD'] = BASIC_AUTH_PASSWORD
 
 basic_auth = BasicAuth(app)
+access_token = None
 
 @app.route('/')
 @basic_auth.required
@@ -42,12 +44,12 @@ def index():
         reverse=True)
 
     root = ET.Element("Projects")
-    project_names = set()  # Set to store unique project names
+    project_names = set()
 
     for run in workflow_runs:
         project_name = repo + "/" + run["name"]
-        if project_name not in project_names:  # Check if project name is already in the set
-            project_names.add(project_name)  # Add project name to the set
+        if project_name not in project_names:
+            project_names.add(project_name)
             project = ET.SubElement(root, "Project")
             project.set("name", project_name)
 
@@ -78,6 +80,21 @@ def index():
 
     return response
 
+
+@app.route('/auth')
+@basic_auth.required
+def auth():
+    """Endpoint for handling Device Flow authentication."""
+    try:
+        # Start the device flow in a separate thread
+        threading.Thread(target=authenticate_with_device_flow).start()
+        
+        # Provide immediate feedback to the client
+        return make_response("Authentication process started. Please check your console for instructions.", 200)
+    except Exception as e:
+        logger.error("An error occurred during authentication: %s", str(e))
+        return make_response("Authentication error.", 500)
+    
 
 @app.route('/health')
 def health():
@@ -142,6 +159,17 @@ def limit():
             'error': 'Failed to retrieve rate limit information'}}
 
     return jsonify(response)
+
+
+@app.route('/token')
+def token():
+    if access_token is None:
+        return jsonify({"error": "Token is not set."}), 401
+    return jsonify({"Token": access_token})
+
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
 
 
 @app.errorhandler(Exception)
