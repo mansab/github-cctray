@@ -227,7 +227,7 @@ pip install -r requirements.txt
 * Execute
 
 ```bash
-* set necessary env variable to authenticate with Github (see [Prerequisites](#prerequisites))
+* set necessary env variable to authenticate with Github (see Prerequisites)
 * export BASIC_AUTH_USERNAME=<user>
 * export BASIC_AUTH_PASSWORD=<pass>
 * python app.py --mode [pat-auth|app-auth] # pat-auth is the default mode if no mode is set
