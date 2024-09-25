@@ -86,10 +86,8 @@ def index():
 def auth():
     """Endpoint for handling Device Flow authentication."""
     try:
-        # Start the device flow in a separate thread
-        threading.Thread(target=authenticate_with_device_flow).start()
+        threading.Thread(target=authenticate_with_device_flow, args=(logger,)).start()
         
-        # Provide immediate feedback to the client
         return make_response("Authentication process started. Please check your console for instructions.", 200)
     except Exception as e:
         logger.error("An error occurred during authentication: %s", str(e))

@@ -1,11 +1,9 @@
 """Helpers Module"""
-import datetime
 import time
 import re
 import base64
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-import jwt
 import requests
 from flask import request
 from config import (
@@ -65,7 +63,7 @@ def get_token():
             raise Exception("Github APP token not found.")
     return token
 
-def authenticate_with_device_flow():
+def authenticate_with_device_flow(logger):
     device_code_url = "https://github.com/login/device/code"
     client_id = APP_AUTH_ID
     payload = {
@@ -75,52 +73,46 @@ def authenticate_with_device_flow():
 
     headers = {
         "Accept": "application/json"
-    }    
+    }
 
-    response = requests.post(device_code_url, json=payload, headers=headers)
-    if response.status_code == 200:
-        data = response.json()
-        device_code = data['device_code']
-        user_code = data['user_code']
-        verification_uri = data['verification_uri']
-        print(f"\nActivate the app by accessing: {verification_uri}")
-        print(f"and enter this activation code: {user_code}")
+    try:
+        response = requests.post(device_code_url, json=payload, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            device_code = data['device_code']
+            user_code = data['user_code']
+            verification_uri = data['verification_uri']
 
-        token_url = "https://github.com/login/oauth/access_token"
-        max_attempts = 2
-        attempt = 0
-        delay = 5
+            print(f"\nActivate GitHub authentication at: {verification_uri}")
+            print(f"Enter activation code: {user_code}")
 
-        while attempt < max_attempts:
-            attempt += 1
-            
+            print(f"\nWaiting 30 seconds for the user to authorize the device...\n")
+            time.sleep(30)
+
+            token_url = "https://github.com/login/oauth/access_token"
             token_response = requests.post(token_url, json={
                 "client_id": client_id,
                 "device_code": device_code,
                 "grant_type": "urn:ietf:params:oauth:grant-type:device_code"
             }, headers={"Accept": "application/json"})
 
-            if token_response.status_code == 200:
-                token_data = token_response.json()
-                return token_data.get("access_token")
-            elif token_response.status_code == 400:
-                error_data = token_response.json()
-                if error_data.get("error") == "authorization_pending":
-                    print(f"Authorization pending... Attempt {attempt}/{max_attempts}. Retrying in {delay} seconds.")
-                    time.sleep(delay)
-                else:
-                    print(f"Error: {error_data.get('error_description')}")
-                    return None
+            token_data = token_response.json()
+            token_value = token_data.get("access_token")
+
+            if token_value is not None:
+                logger.info("Successfully obtained access token.")
+                print(f"Please set env var GITHUB_APP_TOKEN={token_value}")
+                print(f"and restart the app.")
             else:
-                print(f"Unexpected response: {token_response.status_code} {token_response.text}")
+                logger.error(f"Failed to obtain access token. Status: {token_response.status_code}, Response: {token_response.text}")
                 return None
+        else:
+            logger.error(f"Failed to initiate device flow: {response.status_code} {response.text}")
+            return None
 
-        print("Maximum attempts reached. Please try again.")
+    except Exception as e:
+        logger.exception(f"Error during device flow authentication: {str(e)}")
         return None
-    else:
-        raise Exception(f"Failed to initiate device flow: {response.status_code} {response.text}")
-
-
 
 def get_workflows(owner, repo, headers):
     """Get the workflows for a given owner and repo from the GitHub API.
