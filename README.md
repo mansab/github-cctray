@@ -32,16 +32,12 @@ it can be provided by **either** of the following methods:
 
 #### Github APP (Recommened)
 * [Use cctray-auth Github APP](https://github.com/apps/cctray-auth) to grant Read-Only access to Github Actions on your repositories.
-* The Github APP should be installed on the Github Organization or Account with access to the required repositories.
-* You will need to set the following environment variables:
-```
-APP_AUTH_ID=<id_of_your_github_app>
-APP_AUTH_PRIVATE_KEY_B64=<private_key_of_your_github_app_bas64_encoded>
-APP_AUTH_INSTALLATION_ID=<installtion_id_once_installed>
-```
-* Please refer to [Github's offical documentation](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app) to know what these values are and where can you find them 
+* To use this Github APP, you will need to activate it for you or your organization and get a token.
+* Follow the instructions [below](#github-app-method) to use this method.
 
 **Please take into account the [Github API rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting) for authentication tokens.**
+
+**Github APP grants [Read-Only access to repository Metadata & Actions](/images/cctray_auth_permissions.png)**
 
 ## With Docker
 
@@ -53,9 +49,9 @@ docker build -t github-cctray:latest .
 
 ### Launch the Docker container
 
-You can do this in two ways:
+#### You can do this in either of the two methods below:
 
-* Personal Access Token method
+##### Personal Access Token method
 
 ```bash
  docker run -p 8000:8000 \
@@ -65,13 +61,26 @@ You can do this in two ways:
             github-cctray:latest
 ```
 
-* Github App method
+##### Github App method
+
+1. Start the container
 
 ```bash
  docker run -p 8000:8000 \
-            -e APP_AUTH_ID="<id_of_your_github_app>" \
-            -e APP_AUTH_PRIVATE_KEY_B64="<private_key_of_your_github_app_base64_encoded>" \
-            -e APP_AUTH_INSTALLATION_ID="<installtion_id_once_installed>" \
+            -e BASIC_AUTH_USERNAME="<your_username>" \
+            -e BASIC_AUTH_PASSWORD="<your_password>" \
+            github-cctray:latest --mode app-auth
+```
+
+2. Obtain the Github APP token by accessing: http://localhost:8000/auth (this will start the authentication process)
+
+3. Follow the instructions provided in the docker console to activate your device/service & obtain the token.
+
+4. Restart the docker container with the token obtained in step 3.
+
+```bash
+ docker run -p 8000:8000 \
+            -e GITHUB_APP_TOKEN="<github_app_token>" \
             -e BASIC_AUTH_USERNAME="<your_username>" \
             -e BASIC_AUTH_PASSWORD="<your_password>" \
             github-cctray:latest --mode app-auth
@@ -199,7 +208,7 @@ curl -X GET http://localhost:8000/limit?token=<your_token>
 
 # Development Setup
 
-* Python 3.9
+* Python 3.9 & onwards [`tested till 3.11.10`]
 * pip 
 * Activate [Python virtualenv](https://python.land/virtual-environments/virtualenv)
 
@@ -211,15 +220,15 @@ source venv/bin/activate
 * Install requirements
 
 ```bash
+cd src
 pip install -r requirements.txt
 ```
 
 * Execute
 
 ```bash
-* set necessary env variable to authenticate with Github (see Prerequisites)
+* set necessary env variable to authenticate with Github (see [Prerequisites](#prerequisites))
 * export BASIC_AUTH_USERNAME=<user>
 * export BASIC_AUTH_PASSWORD=<pass>
 * python app.py --mode [pat-auth|app-auth] # pat-auth is the default mode if no mode is set
 ```
-
