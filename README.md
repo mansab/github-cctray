@@ -31,9 +31,8 @@ it can be provided by **either** of the following methods:
 * You will need to set: `GITHUB_TOKEN="<your_token>"` as the environment variable.
 
 #### Github APP (Recommened)
-* [Use cctray-auth Github APP](https://github.com/apps/cctray-auth) to grant Read-Only access to Github Actions on your repositories.
-* To use this Github APP, you will need to activate it for you or your organization and get a token.
-* Follow the instructions [below](#github-app-method) to use this method.
+* Install [cctray-auth Github APP](https://github.com/apps/cctray-auth) to grant Read-Only access to Github Actions on Personal or Organization repositories.
+* After installation, you will need to authorize the app and get a Github APP token as described [below](#github-app-method).
 
 **Please take into account the [Github API rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting) for authentication tokens.**
 
