@@ -53,17 +53,23 @@ def get_token(logger):
 
     if token is not None:
         return token
-    elif args.mode == "pat-auth":
+    if args.mode == "pat-auth":
         token = GITHUB_TOKEN
-    elif args.mode == "app-auth":
+        return token
+    if args.mode == "app-auth":
         token = GITHUB_APP_TOKEN
         if not token:
-            logger.info(f"Obtain the Github App token by accessing: http://localhost:8000/auth")
-            logger.info(f"and set GITHUB_APP_TOKEN as environment variable.")
-            raise Exception("Github APP token not found.")
+            logger.info("Obtain the Github App token by accessing: http://localhost:8000/auth")
+            logger.info("and set GITHUB_APP_TOKEN as environment variable.")
+            raise RuntimeError("Github APP token not found.")
     return token
 
 def authenticate_with_device_flow(logger):
+    """Initiates Github Device Authentication flow
+
+    Returns:
+        token: Github App token for the authorized user
+    """
     device_code_url = "https://github.com/login/device/code"
     client_id = APP_AUTH_ID
     payload = {
@@ -76,7 +82,7 @@ def authenticate_with_device_flow(logger):
     }
 
     try:
-        response = requests.post(device_code_url, json=payload, headers=headers)
+        response = requests.post(device_code_url, json=payload, headers=headers, timeout=10)
         if response.status_code == 200:
             data = response.json()
             device_code = data['device_code']
@@ -86,7 +92,7 @@ def authenticate_with_device_flow(logger):
             logger.info(f"Activate GitHub authentication at: {verification_uri}")
             logger.info(f"Enter activation code: {user_code}")
 
-            logger.info(f"Waiting 30 seconds for the user to authorize the device...")
+            logger.info("Waiting 30 seconds for the user to authorize the device...")
             time.sleep(30)
 
             token_url = "https://github.com/login/oauth/access_token"
@@ -94,20 +100,28 @@ def authenticate_with_device_flow(logger):
                 "client_id": client_id,
                 "device_code": device_code,
                 "grant_type": "urn:ietf:params:oauth:grant-type:device_code"
-            }, headers={"Accept": "application/json"})
+            }, headers={"Accept": "application/json"}, timeout=10)
 
             token_data = token_response.json()
             token_value = token_data.get("access_token")
 
             if token_value is not None:
                 logger.info("Successfully obtained access token.")
-                logger.info(f"Please set env var GITHUB_APP_TOKEN={token_value} and restart the app.")
-            else:
-                logger.error(f"Failed to obtain access token. Status: {token_response.status_code}, Response: {token_response.text}")
+                logger.info(
+                    "Please set env var GITHUB_APP_TOKEN=%s and restart the app.", 
+                    token_value
+                )
                 return None
-        else:
-            logger.error(f"Failed to initiate device flow: {response.status_code} {response.text}")
+            logger.error(
+                "Failed to obtain access token. "
+                "Status: %s, Response: %s", 
+                token_response.status_code,
+                token_response.text
+            )
             return None
+
+        logger.error(f"Failed to initiate device flow: {response.status_code} {response.text}")
+        return None
 
     except Exception as e:
         logger.exception(f"Error during device flow authentication: {str(e)}")

@@ -86,13 +86,21 @@ def index():
 def auth():
     """Endpoint for handling Device Flow authentication."""
     try:
-        threading.Thread(target=authenticate_with_device_flow, args=(logger,)).start()
-        
-        return make_response("Authentication process started. Please check your console for instructions.", 200)
-    except Exception as e:
+        threading.Thread(
+            target=authenticate_with_device_flow,
+            args=(logger,)
+        ).start()
+
+        msg = (
+            "Authentication process started. "
+            "Please check your console for instructions."
+        )
+        return make_response(msg, 200)
+
+    except RuntimeError as e:
         logger.error("An error occurred during authentication: %s", str(e))
         return make_response("Authentication error.", 500)
-    
+
 
 @app.route('/health')
 def health():
@@ -152,23 +160,22 @@ def limit():
                 'rate_limit': rate
             }
         logger.info("Request URI: %s Response Code: %d",
-                    redact_token(request.full_path), response.status_code)            
+                    redact_token(request.full_path), response.status_code)
     else:
-        logger.warning("Missing parameter(s) or Environment Variable")   
+        logger.warning("Missing parameter(s) or Environment Variable")
         response = {'status': 'ok', 'rate_limit': {
             'error': 'Failed to retrieve rate limit information'}}
 
     return jsonify(response)
 
 
-@app.route('/token')
-def token():
-    if access_token is None:
-        return jsonify({"error": "Token is not set."}), 401
-    return jsonify({"Token": access_token})
-
 @app.route('/favicon.ico')
 def favicon():
+    """Handle favicon reuquests from browser
+
+    Returns:
+        http_status: 204
+    """  
     return '', 204
 
 
