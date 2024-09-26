@@ -40,7 +40,13 @@ it can be provided by **either** of the following methods:
 
 ## With Docker
 
-### Build the Docker image
+### Pull the Docker image
+
+```bash
+docker pull ghcr.io/mansab/github-cctray:v4.0.0
+```
+
+### or Build it yourself
 
 ```bash
 docker build -t github-cctray:latest . 
