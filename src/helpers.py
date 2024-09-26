@@ -34,7 +34,7 @@ def redact_token(uri):
     return re.sub(r'(\?|&)token=.*?(&|$)', r'\1token=<REDACTED>\2', uri)
 
 
-def get_token():
+def get_token(logger):
     """Sets the GitHub API token based on the selected mode
 
     Returns:
@@ -58,8 +58,8 @@ def get_token():
     elif args.mode == "app-auth":
         token = GITHUB_APP_TOKEN
         if not token:
-            print(f"\nObtain the Github App token by accessing: http://localhost:8000/auth")
-            print(f"and set GITHUB_APP_TOKEN as environment variable.\n")
+            logger.info(f"Obtain the Github App token by accessing: http://localhost:8000/auth")
+            logger.info(f"and set GITHUB_APP_TOKEN as environment variable.")
             raise Exception("Github APP token not found.")
     return token
 
@@ -83,10 +83,10 @@ def authenticate_with_device_flow(logger):
             user_code = data['user_code']
             verification_uri = data['verification_uri']
 
-            print(f"\nActivate GitHub authentication at: {verification_uri}")
-            print(f"Enter activation code: {user_code}")
+            logger.info(f"Activate GitHub authentication at: {verification_uri}")
+            logger.info(f"Enter activation code: {user_code}")
 
-            print(f"\nWaiting 30 seconds for the user to authorize the device...\n")
+            logger.info(f"Waiting 30 seconds for the user to authorize the device...")
             time.sleep(30)
 
             token_url = "https://github.com/login/oauth/access_token"
@@ -101,8 +101,7 @@ def authenticate_with_device_flow(logger):
 
             if token_value is not None:
                 logger.info("Successfully obtained access token.")
-                print(f"Please set env var GITHUB_APP_TOKEN={token_value}")
-                print(f"and restart the app.")
+                logger.info(f"Please set env var GITHUB_APP_TOKEN={token_value} and restart the app.")
             else:
                 logger.error(f"Failed to obtain access token. Status: {token_response.status_code}, Response: {token_response.text}")
                 return None

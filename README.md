@@ -212,7 +212,7 @@ curl -X GET http://localhost:8000/limit?token=<your_token>
 * Activate [Python virtualenv](https://python.land/virtual-environments/virtualenv)
 
 ```bash
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 ```
 
@@ -229,5 +229,5 @@ pip install -r requirements.txt
 * set necessary env variable to authenticate with Github (see Prerequisites)
 * export BASIC_AUTH_USERNAME=<user>
 * export BASIC_AUTH_PASSWORD=<pass>
-* python app.py --mode [pat-auth|app-auth] # pat-auth is the default mode if no mode is set
+* python3 app.py --mode [pat-auth|app-auth] # pat-auth is the default mode if no mode is set
 ```

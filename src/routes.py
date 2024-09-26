@@ -10,7 +10,7 @@ from flask_basicauth import BasicAuth
 from helpers import get_token, get_all_workflow_runs, redact_token, authenticate_with_device_flow
 from config import BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, TIMEOUT
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 app = Flask('github-cctray')
@@ -30,7 +30,7 @@ def index():
     """
     owner = request.args.get("owner") or request.form.get('owner')
     repo = request.args.get("repo") or request.form.get('repo')
-    token = get_token()
+    token = get_token(logger=logger)
 
     if not owner or not repo or not token:
         logger.warning("Missing parameter(s) or Environment Variable")
@@ -113,7 +113,6 @@ def health():
         'status': 'ok',
         'version': f'{latest_version}'
     }
-
     return jsonify(response)
 
 
@@ -125,7 +124,7 @@ def limit():
     Returns:
         flask.Response: JSON response containing rate limiting information.
     """
-    token = get_token()
+    token = get_token(logger=logger)
     headers = {
         'Accept': 'application/vnd.github+json',
         "Authorization": f"Bearer {token}",
@@ -152,7 +151,10 @@ def limit():
                 'status': 'ok',
                 'rate_limit': rate
             }
+        logger.info("Request URI: %s Response Code: %d",
+                    redact_token(request.full_path), response.status_code)            
     else:
+        logger.warning("Missing parameter(s) or Environment Variable")   
         response = {'status': 'ok', 'rate_limit': {
             'error': 'Failed to retrieve rate limit information'}}
 
