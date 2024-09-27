@@ -28,7 +28,7 @@ it can be provided by **either** of the following methods:
 #### Github Personal Access Token
 * [FGPAT (recommended) or PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 * Read-Only access to Actions (Workflows, workflow runs and artifacts) required for Private repos.
-* You will need to set: `GITHUB_TOKEN="<your_token>"` as the environment variable.
+* You will need to set: `GITHUB_TOKEN="<your_github_token>"` as the environment variable.
 
 #### Github APP (Recommened)
 * Install [cctray-auth Github APP](https://github.com/apps/cctray-auth) to grant Read-Only access to Github Actions on Personal or Organization repositories.
@@ -60,9 +60,9 @@ docker build -t github-cctray:latest .
 
 ```bash
  docker run -p 8000:8000 \
-            -e GITHUB_TOKEN="<your_token>" \
-            -e BASIC_AUTH_USERNAME="<your_username>" \
-            -e BASIC_AUTH_PASSWORD="<your_password>" \
+            -e GITHUB_TOKEN="<your_github_token>" \
+            -e LOGIN_USER="<set_username>" \
+            -e LOGIN_PASSWORD="<set_password>" \
             github-cctray:latest
 ```
 
@@ -72,8 +72,8 @@ docker build -t github-cctray:latest .
 
 ```bash
  docker run -p 8000:8000 \
-            -e BASIC_AUTH_USERNAME="<your_username>" \
-            -e BASIC_AUTH_PASSWORD="<your_password>" \
+            -e LOGIN_USER="<set_username>" \
+            -e LOGIN_PASSWORD="<set_password>" \
             github-cctray:latest --mode app-auth
 ```
 
@@ -86,8 +86,8 @@ docker build -t github-cctray:latest .
 ```bash
  docker run -p 8000:8000 \
             -e GITHUB_APP_TOKEN="<github_app_token>" \
-            -e BASIC_AUTH_USERNAME="<your_username>" \
-            -e BASIC_AUTH_PASSWORD="<your_password>" \
+            -e LOGIN_USER="<set_username>" \
+            -e LOGIN_PASSWORD="<set_password>" \
             github-cctray:latest --mode app-auth
 ```
 
@@ -117,7 +117,7 @@ curl -X GET http://localhost:8000?owner=<repo_owner>&repo=<repository_name>
 
 * Optional Parameter
 ```bash
-curl -X GET http://localhost:8000?owner=<repo_owner>&repo=<repository_name&token=<your_token>
+curl -X GET http://localhost:8000?owner=<repo_owner>&repo=<repository_name&token=<your_github_token>
 ```
 
 ## Response
@@ -202,7 +202,7 @@ curl -X GET http://localhost:8000/limit
 
 * With token in the query parameter
 ```bash
-curl -X GET http://localhost:8000/limit?token=<your_token>
+curl -X GET http://localhost:8000/limit?token=<your_github_token>
 ```
 
 ### Response
@@ -233,7 +233,7 @@ pip install -r requirements.txt
 
 ```bash
 * set necessary env variable to authenticate with Github (see Prerequisites)
-* export BASIC_AUTH_USERNAME=<user>
-* export BASIC_AUTH_PASSWORD=<pass>
+* export LOGIN_USER=<user>
+* export LOGIN_PASSWORD=<pass>
 * python3 app.py --mode [pat-auth|app-auth] # pat-auth is the default mode if no mode is set
 ```

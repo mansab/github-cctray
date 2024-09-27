@@ -5,8 +5,8 @@ API_BASE_URL = "https://api.github.com"
 MAX_WORKERS = 10
 TIMEOUT = 10
 
-BASIC_AUTH_USERNAME = os.environ.get("BASIC_AUTH_USERNAME")
-BASIC_AUTH_PASSWORD = os.environ.get("BASIC_AUTH_PASSWORD")
+LOGIN_USER = os.environ.get("LOGIN_USER")
+LOGIN_PASSWORD = os.environ.get("LOGIN_PASSWORD")
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 GITHUB_APP_TOKEN = os.environ.get("GITHUB_APP_TOKEN")

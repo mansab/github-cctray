@@ -8,14 +8,14 @@ import threading
 from flask import Flask, request, make_response, jsonify
 from flask_basicauth import BasicAuth
 from helpers import get_token, get_all_workflow_runs, redact_token, authenticate_with_device_flow
-from config import BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD, TIMEOUT
+from config import LOGIN_USER, LOGIN_PASSWORD, TIMEOUT
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 app = Flask('github-cctray')
-app.config['BASIC_AUTH_USERNAME'] = BASIC_AUTH_USERNAME
-app.config['BASIC_AUTH_PASSWORD'] = BASIC_AUTH_PASSWORD
+app.config['LOGIN_USER'] = LOGIN_USER
+app.config['LOGIN_PASSWORD'] = LOGIN_PASSWORD
 
 basic_auth = BasicAuth(app)
 access_token = None

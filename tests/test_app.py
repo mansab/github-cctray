@@ -7,8 +7,8 @@ class RoutesTestCase(unittest.TestCase):
     def setUp(self):
         """Set up the test environment."""
         app.testing = True
-        app.config['BASIC_AUTH_USERNAME'] = 'user'
-        app.config['BASIC_AUTH_PASSWORD'] = 'pass'
+        app.config['LOGIN_USER'] = 'user'
+        app.config['LOGIN_PASSWORD'] = 'pass'
         self.client = app.test_client()
         self.headers = {
             'Authorization': 'Basic dXNlcjpwYXNz'
